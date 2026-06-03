@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { db } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
+const { sendEmail } = require('../services/emailService');
 const { v4: uuidv4 } = require('uuid');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'reminderflow_secret';
@@ -94,14 +95,26 @@ router.post('/register', async (req, res) => {
     console.log(`[EMAIL VERIFICATION] Code for ${emailClean}: ${verificationCode}`);
     console.log(`==================================================\n`);
 
+    // Send real email verification code via SMTP
+    const emailText = `Hello ${name.trim()},\n\nYour verification code is: ${verificationCode}\n\nThank you.`;
+    const emailResult = await sendEmail({
+      to: emailClean,
+      subject: 'Verify Your ReminderFlow Account',
+      text: emailText
+    });
+    
+    let deliveryStatus = emailResult.success ? 'delivered' : 'failed';
+    if (emailResult.mock) deliveryStatus = 'delivered';
+
     // Insert verification code into messages collection so it can be seen if needed
     await db.messages.insert({
       _id: uuidv4(),
       customer_name: name.trim(),
       phone: 'SYSTEM',
       message_type: 'verification_email',
-      message_body: `Hello ${name.trim()},\n\nYour verification code is: ${verificationCode}\n\nThank you.`,
-      delivery_status: 'delivered',
+      message_body: emailText,
+      delivery_status: deliveryStatus,
+      error_message: emailResult.error || null,
       sent_at: new Date().toISOString(),
     });
 
@@ -191,13 +204,24 @@ router.post('/resend-verification', async (req, res) => {
     console.log(`[EMAIL VERIFICATION RESENT] Code for ${emailClean}: ${verificationCode}`);
     console.log(`==================================================\n`);
 
+    const emailText = `Hello ${user.name},\n\nYour verification code is: ${verificationCode}\n\nThank you.`;
+    const emailResult = await sendEmail({
+      to: emailClean,
+      subject: 'Verify Your ReminderFlow Account',
+      text: emailText
+    });
+
+    let deliveryStatus = emailResult.success ? 'delivered' : 'failed';
+    if (emailResult.mock) deliveryStatus = 'delivered';
+
     await db.messages.insert({
       _id: uuidv4(),
       customer_name: user.name,
       phone: 'SYSTEM',
       message_type: 'verification_email',
-      message_body: `Hello ${user.name},\n\nYour verification code is: ${verificationCode}\n\nThank you.`,
-      delivery_status: 'delivered',
+      message_body: emailText,
+      delivery_status: deliveryStatus,
+      error_message: emailResult.error || null,
       sent_at: new Date().toISOString(),
     });
 
@@ -229,13 +253,24 @@ router.post('/forgot-password', async (req, res) => {
     console.log(`[PASSWORD RESET] Code for ${emailClean}: ${resetToken}`);
     console.log(`==================================================\n`);
 
+    const emailText = `Hello ${user.name},\n\nYour password reset code is: ${resetToken}\n\nThank you.`;
+    const emailResult = await sendEmail({
+      to: emailClean,
+      subject: 'Reset Your ReminderFlow Password',
+      text: emailText
+    });
+
+    let deliveryStatus = emailResult.success ? 'delivered' : 'failed';
+    if (emailResult.mock) deliveryStatus = 'delivered';
+
     await db.messages.insert({
       _id: uuidv4(),
       customer_name: user.name,
       phone: 'SYSTEM',
       message_type: 'password_reset_email',
-      message_body: `Hello ${user.name},\n\nYour password reset code is: ${resetToken}\n\nThank you.`,
-      delivery_status: 'delivered',
+      message_body: emailText,
+      delivery_status: deliveryStatus,
+      error_message: emailResult.error || null,
       sent_at: new Date().toISOString(),
     });
 

@@ -69,6 +69,7 @@ async function sendWhatsApp(to, body) {
       
       const resData = await response.json();
       if (!response.ok) {
+        console.error('[Meta WhatsApp] API Error Response:', JSON.stringify(resData, null, 2));
         throw new Error(resData.error?.message || 'Meta API error');
       }
       
@@ -107,6 +108,7 @@ async function sendWhatsApp(to, body) {
       console.log(`[Twilio WhatsApp] Message sent to ${to}, SID: ${message.sid}`);
       return { success: true, sid: message.sid };
     } catch (err) {
+      console.error(`[Twilio WhatsApp] Error details:`, err);
       console.error(`[Twilio WhatsApp] Failed to send to ${to}:`, err.message);
       return { success: false, error: err.message };
     }
