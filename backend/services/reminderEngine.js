@@ -89,15 +89,13 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
     let errorMessage = null;
     let messageSid = null;
 
-    if (settings.messaging_provider === 'twilio') {
-      const result = await sendWhatsApp(appt.phone, message);
-      if (!result.success) {
-        deliveryStatus = 'failed';
-        errorMessage = result.error;
-      } else {
-        deliveryStatus = result.mock ? 'sent' : 'delivered';
-        messageSid = result.sid;
-      }
+    const result = await sendWhatsApp(appt.phone, message);
+    if (!result.success) {
+      deliveryStatus = 'failed';
+      errorMessage = result.error;
+    } else {
+      deliveryStatus = result.mock ? 'sent' : 'delivered';
+      messageSid = result.sid;
     }
 
     await db.messages.insert({

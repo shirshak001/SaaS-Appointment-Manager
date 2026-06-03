@@ -20,7 +20,6 @@ export default function Settings() {
     support_number: '',
     business_address: '',
     reminder_before_minutes: 60,
-    messaging_provider: 'mock',
   });
 
   useEffect(() => {
@@ -32,7 +31,6 @@ export default function Settings() {
           support_number: settings.support_number,
           business_address: settings.business_address || '',
           reminder_before_minutes: settings.reminder_before_minutes,
-          messaging_provider: settings.messaging_provider,
         });
       })
       .catch(() => addToast({ type: 'error', title: 'Failed to load settings' }))
@@ -186,101 +184,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Messaging provider */}
-        <div className="card p-5 space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <MessageSquare className="w-4 h-4" style={{ color: 'rgb(var(--clr-ink-ghost))' }} strokeWidth={1.75} />
-            <h2 className="text-sm font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>Messaging provider</h2>
-          </div>
 
-          <div className="space-y-2">
-            <label
-              className="flex items-start gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all"
-              style={
-                form.messaging_provider === 'mock'
-                  ? { borderColor: 'rgb(var(--clr-primary))', backgroundColor: 'rgb(var(--clr-primary) / 0.1)' }
-                  : { borderColor: 'rgb(var(--clr-border))' }
-              }
-              onMouseEnter={e => {
-                if (form.messaging_provider !== 'mock') {
-                  e.currentTarget.style.borderColor = 'rgb(var(--clr-border-strong))';
-                }
-              }}
-              onMouseLeave={e => {
-                if (form.messaging_provider !== 'mock') {
-                  e.currentTarget.style.borderColor = 'rgb(var(--clr-border))';
-                }
-              }}
-            >
-              <input
-                type="radio"
-                name="provider"
-                value="mock"
-                checked={form.messaging_provider === 'mock'}
-                onChange={() => set('messaging_provider', 'mock')}
-                className="accent-primary mt-0.5"
-              />
-              <div>
-                <p
-                  className="text-xs font-semibold"
-                  style={{
-                    color: form.messaging_provider === 'mock'
-                      ? 'rgb(var(--clr-primary-600))'
-                      : 'rgb(var(--clr-ink))',
-                  }}
-                >
-                  Mock Gateway + WhatsApp Web
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
-                  100% free. Reminders are logged in the dashboard. WhatsApp Web links let you send manually with one click.
-                </p>
-              </div>
-            </label>
-
-            <label
-              className="flex items-start gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all"
-              style={
-                form.messaging_provider === 'twilio'
-                  ? { borderColor: 'rgb(var(--clr-primary))', backgroundColor: 'rgb(var(--clr-primary) / 0.1)' }
-                  : { borderColor: 'rgb(var(--clr-border))' }
-              }
-              onMouseEnter={e => {
-                if (form.messaging_provider !== 'twilio') {
-                  e.currentTarget.style.borderColor = 'rgb(var(--clr-border-strong))';
-                }
-              }}
-              onMouseLeave={e => {
-                if (form.messaging_provider !== 'twilio') {
-                  e.currentTarget.style.borderColor = 'rgb(var(--clr-border))';
-                }
-              }}
-            >
-              <input
-                type="radio"
-                name="provider"
-                value="twilio"
-                checked={form.messaging_provider === 'twilio'}
-                onChange={() => set('messaging_provider', 'twilio')}
-                className="accent-primary mt-0.5"
-              />
-              <div>
-                <p
-                  className="text-xs font-semibold"
-                  style={{
-                    color: form.messaging_provider === 'twilio'
-                      ? 'rgb(var(--clr-primary-600))'
-                      : 'rgb(var(--clr-ink))',
-                  }}
-                >
-                  Twilio WhatsApp API
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
-                  Production messaging. Requires TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN in backend .env file.
-                </p>
-              </div>
-            </label>
-          </div>
-        </div>
 
         <div className="flex items-center gap-3">
           <button type="submit" disabled={saving} className="btn-lg btn-primary">
@@ -301,9 +205,9 @@ export default function Settings() {
         </div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3" style={{ borderTop: '1px solid rgb(var(--clr-border))' }}>
           <div>
-            <p className="text-xs font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>Clear Demo Data</p>
+            <p className="text-xs font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>Delete All System Data</p>
             <p className="text-[11px] mt-0.5" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
-              Deletes all pre-seeded and testing appointments, notes, messages, and notifications.
+              Deletes all appointments, notes, messages, and notifications permanently.
             </p>
           </div>
           <button
@@ -312,7 +216,7 @@ export default function Settings() {
               if (window.confirm('Are you absolutely sure you want to delete all appointments and messages? This action is permanent.')) {
                 try {
                   await api.resetDatabase();
-                  addToast({ type: 'success', title: 'Data cleared', message: 'All demo appointments and messages have been deleted.' });
+                  addToast({ type: 'success', title: 'Data cleared', message: 'All appointments and messages have been deleted.' });
                 } catch (err) {
                   addToast({ type: 'error', title: 'Failed to reset database', message: err.message });
                 }
@@ -320,7 +224,7 @@ export default function Settings() {
             }}
             className="px-4 py-2 text-xs font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors focus:outline-none"
           >
-            Clear Demo Data
+            Clear System Data
           </button>
         </div>
       </div>

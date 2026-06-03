@@ -121,15 +121,13 @@ router.post('/', authenticate, async (req, res) => {
     let errorMessage = null;
     let messageSid = null;
 
-    if (settings.messaging_provider === 'twilio') {
-      const result = await sendWhatsApp(phone.trim(), confirmMsg);
-      if (!result.success) {
-        deliveryStatus = 'failed';
-        errorMessage = result.error;
-      } else {
-        deliveryStatus = result.mock ? 'sent' : 'delivered';
-        messageSid = result.sid;
-      }
+    const result = await sendWhatsApp(phone.trim(), confirmMsg);
+    if (!result.success) {
+      deliveryStatus = 'failed';
+      errorMessage = result.error;
+    } else {
+      deliveryStatus = result.mock ? 'sent' : 'delivered';
+      messageSid = result.sid;
     }
 
     await db.messages.insert({
@@ -200,15 +198,13 @@ router.post('/:id/send-reminder', authenticate, async (req, res) => {
     let errorMessage = null;
     let messageSid = null;
 
-    if (settings.messaging_provider === 'twilio') {
-      const result = await sendWhatsApp(appt.phone, message);
-      if (!result.success) {
-        deliveryStatus = 'failed';
-        errorMessage = result.error;
-      } else {
-        deliveryStatus = result.mock ? 'sent' : 'delivered';
-        messageSid = result.sid;
-      }
+    const result = await sendWhatsApp(appt.phone, message);
+    if (!result.success) {
+      deliveryStatus = 'failed';
+      errorMessage = result.error;
+    } else {
+      deliveryStatus = result.mock ? 'sent' : 'delivered';
+      messageSid = result.sid;
     }
 
     await db.messages.insert({
