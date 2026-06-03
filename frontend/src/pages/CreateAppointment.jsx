@@ -92,11 +92,23 @@ export default function CreateAppointment() {
     customer_name: '',
     phone: '',
     appointment_date: '',
-    appointment_time: '',
+    appointment_time: '09:00',
     notes: '',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+
+  const [timeHour, setTimeHour] = useState('09');
+  const [timeMinute, setTimeMinute] = useState('00');
+  const [timePeriod, setTimePeriod] = useState('AM');
+
+  useEffect(() => {
+    let hh = parseInt(timeHour, 10);
+    if (timePeriod === 'PM' && hh < 12) hh += 12;
+    if (timePeriod === 'AM' && hh === 12) hh = 0;
+    const hhStr = hh.toString().padStart(2, '0');
+    setForm(p => ({ ...p, appointment_time: `${hhStr}:${timeMinute}` }));
+  }, [timeHour, timeMinute, timePeriod]);
 
   const set = (field, value) => {
     setForm(p => ({ ...p, [field]: value }));
@@ -201,14 +213,54 @@ export default function CreateAppointment() {
               {errors.appointment_date && <p className="mt-1 text-xs text-danger">{errors.appointment_date}</p>}
             </div>
             <div>
-              <label htmlFor="appointment_time" className="input-label">Time</label>
-              <input
-                id="appointment_time"
-                type="time"
-                value={form.appointment_time}
-                onChange={e => set('appointment_time', e.target.value)}
-                className={`input ${errors.appointment_time ? 'border-danger' : ''}`}
-              />
+              <label className="input-label">Time</label>
+              <div className="flex items-center gap-1.5">
+                {/* Hour Select */}
+                <select
+                  value={timeHour}
+                  onChange={e => {
+                    setTimeHour(e.target.value);
+                    if (errors.appointment_time) setErrors(p => ({ ...p, appointment_time: '' }));
+                  }}
+                  className={`input text-center py-2 px-2 text-xs ${errors.appointment_time ? 'border-danger' : ''}`}
+                  style={{ width: '68px', appearance: 'none', backgroundPosition: 'right 0.35rem center' }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0')).map(h => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+
+                <span style={{ color: 'rgb(var(--clr-ink-ghost))' }} className="font-semibold text-xs">:</span>
+
+                {/* Minute Select */}
+                <select
+                  value={timeMinute}
+                  onChange={e => {
+                    setTimeMinute(e.target.value);
+                    if (errors.appointment_time) setErrors(p => ({ ...p, appointment_time: '' }));
+                  }}
+                  className={`input text-center py-2 px-2 text-xs ${errors.appointment_time ? 'border-danger' : ''}`}
+                  style={{ width: '68px', appearance: 'none', backgroundPosition: 'right 0.35rem center' }}
+                >
+                  {Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0')).map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+
+                {/* Period Select */}
+                <select
+                  value={timePeriod}
+                  onChange={e => {
+                    setTimePeriod(e.target.value);
+                    if (errors.appointment_time) setErrors(p => ({ ...p, appointment_time: '' }));
+                  }}
+                  className={`input text-center py-2 px-2 text-xs ${errors.appointment_time ? 'border-danger' : ''}`}
+                  style={{ width: '72px', appearance: 'none', backgroundPosition: 'right 0.35rem center' }}
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
               {errors.appointment_time && <p className="mt-1 text-xs text-danger">{errors.appointment_time}</p>}
             </div>
           </div>
