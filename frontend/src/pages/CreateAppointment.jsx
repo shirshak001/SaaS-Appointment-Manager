@@ -131,7 +131,8 @@ export default function CreateAppointment() {
     if (Object.keys(e2).length) { setErrors(e2); return; }
     setLoading(true);
     try {
-      const appointment_time = `${form.appointment_date}T${form.appointment_time}:00`;
+      const localDateTime = new Date(`${form.appointment_date}T${form.appointment_time}:00`);
+      const appointment_time = localDateTime.toISOString();
       const res = await api.createAppointment({
         customer_name: form.customer_name.trim(),
         phone: form.phone.trim(),

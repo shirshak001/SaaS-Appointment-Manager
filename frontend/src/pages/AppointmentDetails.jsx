@@ -40,11 +40,19 @@ export default function AppointmentDetails() {
         setAppt(appointment);
         setMessages(messages);
         if (stages) setReminderStages(stages);
+        
+        const dateObj = new Date(appointment.appointment_time);
+        const yyyy = dateObj.getFullYear();
+        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const dd = String(dateObj.getDate()).padStart(2, '0');
+        const hh = String(dateObj.getHours()).padStart(2, '0');
+        const min = String(dateObj.getMinutes()).padStart(2, '0');
+
         setEditForm({
           customer_name: appointment.customer_name,
           phone: appointment.phone,
-          appointment_date: appointment.appointment_time.split('T')[0],
-          appointment_time: appointment.appointment_time.split('T')[1]?.slice(0, 5) || '',
+          appointment_date: `${yyyy}-${mm}-${dd}`,
+          appointment_time: `${hh}:${min}`,
           notes: appointment.notes || '',
           status: appointment.status,
         });
@@ -58,7 +66,8 @@ export default function AppointmentDetails() {
   const handleSaveEdit = async () => {
     setSavingEdit(true);
     try {
-      const appointment_time = `${editForm.appointment_date}T${editForm.appointment_time}:00`;
+      const localDateTime = new Date(`${editForm.appointment_date}T${editForm.appointment_time}:00`);
+      const appointment_time = localDateTime.toISOString();
       const { appointment } = await api.updateAppointment(id, {
         customer_name: editForm.customer_name,
         phone: editForm.phone,
