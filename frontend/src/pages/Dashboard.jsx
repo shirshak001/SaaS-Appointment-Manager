@@ -319,7 +319,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Stat cards */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard label="Total appointments" value={stats.total} sub="All time"
           icon={CalendarDays} iconBg="rgb(var(--clr-primary) / 0.1)" iconColor="rgb(var(--clr-primary-600))" />
         <StatCard label="Today" value={stats.today} sub="Scheduled for today"

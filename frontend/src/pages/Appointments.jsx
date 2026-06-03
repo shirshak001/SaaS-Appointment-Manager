@@ -104,7 +104,7 @@ export default function Appointments() {
         </form>
 
         <div
-          className="flex items-center gap-1 rounded-xl p-1"
+          className="flex items-center gap-1 rounded-xl p-1 overflow-x-auto max-w-full"
           style={{
             backgroundColor: 'rgb(var(--clr-surface-raised))',
             border: '1px solid rgb(var(--clr-border))',

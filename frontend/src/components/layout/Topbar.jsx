@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Plus, Sun, Moon } from 'lucide-react';
+import { Search, Plus, Sun, Moon, Menu } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import NotificationPanel from '../notifications/NotificationPanel';
 
@@ -15,7 +15,7 @@ const pageTitles = {
   '/settings':        'Settings',
 };
 
-export default function Topbar({ liveNotifs = [] }) {
+export default function Topbar({ liveNotifs = [], onToggleSidebar }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { toggle, isDark } = useTheme();
@@ -40,6 +40,16 @@ export default function Topbar({ liveNotifs = [] }) {
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
       }}
     >
+      {/* Mobile Sidebar Toggle */}
+      <button
+        onClick={onToggleSidebar}
+        className="flex md:hidden p-1 rounded-lg hover:bg-[rgb(var(--clr-surface-overlay))] transition-colors focus:outline-none"
+        style={{ color: 'rgb(var(--clr-ink-muted))' }}
+        aria-label="Toggle menu"
+      >
+        <Menu className="w-5 h-5" strokeWidth={2} />
+      </button>
+
       <div className="flex-1">
         <h2 className="text-sm font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>
           {title}

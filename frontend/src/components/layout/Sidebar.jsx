@@ -36,7 +36,7 @@ const navGroups = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }) {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
 
@@ -80,6 +80,7 @@ export default function Sidebar() {
                   <NavLink
                     to={to}
                     className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                    onClick={() => { if (onClose) onClose(); }}
                   >
                     <Icon className="w-4 h-4 shrink-0" strokeWidth={1.75} />
                     <span>{label}</span>
@@ -112,7 +113,7 @@ export default function Sidebar() {
           </div>
         </div>
         <button
-          onClick={() => { logout(); navigate('/login'); }}
+          onClick={() => { logout(); navigate('/login'); if (onClose) onClose(); }}
           className="sidebar-item w-full"
           style={{ color: 'rgb(var(--clr-ink-ghost))' }}
         >

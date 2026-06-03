@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Sidebar from './Sidebar';
@@ -7,6 +8,7 @@ import { useReminderSSE } from '../../hooks/useReminderSSE';
 export default function AppLayout() {
   const { isAuthenticated, loading } = useAuth();
   const { liveNotifs } = useReminderSSE(isAuthenticated);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) {
     return (
@@ -31,14 +33,31 @@ export default function AppLayout() {
 
   return (
     <div
-      className="flex h-screen overflow-hidden"
+      className="flex h-screen overflow-hidden relative"
       style={{ backgroundColor: 'rgb(var(--clr-surface))' }}
     >
-      <Sidebar />
+      {/* Mobile Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity duration-200"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Wrapper */}
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 md:relative md:translate-x-0 transition-transform duration-200 ease-in-out shrink-0
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <Sidebar onClose={() => setSidebarOpen(false)} />
+      </div>
+
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <Topbar liveNotifs={liveNotifs} />
+        <Topbar liveNotifs={liveNotifs} onToggleSidebar={() => setSidebarOpen(p => !p)} />
         <main
-          className="flex-1 overflow-y-auto p-6"
+          className="flex-1 overflow-y-auto p-4 md:p-6"
           style={{ backgroundColor: 'rgb(var(--clr-surface))' }}
         >
           <Outlet />

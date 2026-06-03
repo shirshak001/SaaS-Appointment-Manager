@@ -290,6 +290,40 @@ export default function Settings() {
           </button>
         </div>
       </form>
+
+      {/* Danger Zone */}
+      <div className="mt-8 card p-5 space-y-4" style={{ borderColor: 'rgba(239, 68, 68, 0.25)' }}>
+        <div>
+          <h3 className="text-sm font-semibold text-red-600">Danger Zone</h3>
+          <p className="text-xs mt-1" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
+            Actions here are permanent and cannot be undone.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3" style={{ borderTop: '1px solid rgb(var(--clr-border))' }}>
+          <div>
+            <p className="text-xs font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>Clear Demo Data</p>
+            <p className="text-[11px] mt-0.5" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
+              Deletes all pre-seeded and testing appointments, notes, messages, and notifications.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              if (window.confirm('Are you absolutely sure you want to delete all appointments and messages? This action is permanent.')) {
+                try {
+                  await api.resetDatabase();
+                  addToast({ type: 'success', title: 'Data cleared', message: 'All demo appointments and messages have been deleted.' });
+                } catch (err) {
+                  addToast({ type: 'error', title: 'Failed to reset database', message: err.message });
+                }
+              }
+            }}
+            className="px-4 py-2 text-xs font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors focus:outline-none"
+          >
+            Clear Demo Data
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

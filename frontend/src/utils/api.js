@@ -72,4 +72,5 @@ export const api = {
   // Settings
   getSettings: () => request('/settings'),
   updateSettings: (data) => request('/settings', { method: 'PUT', body: JSON.stringify(data) }),
+  resetDatabase: () => request('/settings/reset-database', { method: 'POST' }),
 };

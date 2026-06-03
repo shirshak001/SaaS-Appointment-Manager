@@ -32,4 +32,20 @@ router.put('/', authenticate, async (req, res) => {
   }
 });
 
+// POST /api/settings/reset-database
+router.post('/reset-database', authenticate, async (req, res) => {
+  try {
+    // Delete all records in appointments, messages, notes, and notifications
+    await Promise.all([
+      db.appointments.remove({}, { multi: true }),
+      db.messages.remove({}, { multi: true }),
+      db.notes.remove({}, { multi: true }),
+      db.notifications.remove({}, { multi: true }),
+    ]);
+    res.json({ success: true, message: 'Demo data cleared successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
