@@ -31,10 +31,10 @@ export default function Login() {
     setLoading(true);
     try {
       if (isSignUp) {
-        await register(form.name, form.email, form.password);
+        await register(form.name, form.email, form.password, remember);
         addToast({ type: 'success', title: 'Welcome', message: 'Account created successfully.' });
       } else {
-        await login(form.email, form.password);
+        await login(form.email, form.password, remember);
         addToast({ type: 'success', title: 'Welcome back', message: 'Signed in successfully.' });
       }
       navigate('/dashboard');

@@ -8,12 +8,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('rf_token');
+    const token = localStorage.getItem('rf_token') || sessionStorage.getItem('rf_token');
     if (token) {
       api.me()
         .then(({ user }) => setUser(user))
         .catch(() => {
           localStorage.removeItem('rf_token');
+          sessionStorage.removeItem('rf_token');
           setUser(null);
         })
         .finally(() => setLoading(false));
@@ -22,22 +23,35 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, password, remember = true) => {
     const { token, user } = await api.login(email, password);
-    localStorage.setItem('rf_token', token);
+    if (remember) {
+      localStorage.setItem('rf_token', token);
+      sessionStorage.removeItem('rf_token');
+    } else {
+      sessionStorage.setItem('rf_token', token);
+      localStorage.removeItem('rf_token');
+    }
     setUser(user);
     return user;
   }, []);
 
-  const register = useCallback(async (name, email, password) => {
+  const register = useCallback(async (name, email, password, remember = true) => {
     const { token, user } = await api.register(name, email, password);
-    localStorage.setItem('rf_token', token);
+    if (remember) {
+      localStorage.setItem('rf_token', token);
+      sessionStorage.removeItem('rf_token');
+    } else {
+      sessionStorage.setItem('rf_token', token);
+      localStorage.removeItem('rf_token');
+    }
     setUser(user);
     return user;
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('rf_token');
+    sessionStorage.removeItem('rf_token');
     setUser(null);
   }, []);
 
