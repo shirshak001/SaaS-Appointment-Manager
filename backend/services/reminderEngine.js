@@ -17,8 +17,8 @@ function broadcastReminder(notification) {
 
 function buildReminderMessage(appt, settings, stage = '1h') {
   const d = new Date(appt.appointment_time);
-  const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-  const dateStr = d.toLocaleDateString('en-IN', { month: 'long', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+  const dateStr = d.toLocaleDateString('en-IN', { month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' });
   const first = appt.customer_name.split(' ')[0];
   const biz = settings?.business_name || 'ReminderFlow';
   const num = settings?.support_number || '';
@@ -34,8 +34,8 @@ function buildReminderMessage(appt, settings, stage = '1h') {
 
 function buildConfirmationMessage(appt, settings) {
   const d = new Date(appt.appointment_time);
-  const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-  const dateStr = d.toLocaleDateString('en-IN', { month: 'long', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+  const dateStr = d.toLocaleDateString('en-IN', { month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' });
   const first = appt.customer_name.split(' ')[0];
   const biz = settings?.business_name || 'ReminderFlow';
   const num = settings?.support_number || '';
@@ -43,7 +43,10 @@ function buildConfirmationMessage(appt, settings) {
 }
 
 function generateWhatsAppLink(phone, message) {
-  const cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
+  let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.length === 10) {
+    cleaned = '91' + cleaned;
+  }
   return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
 }
 
@@ -83,7 +86,7 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
     const waLink = generateWhatsAppLink(appt.phone, message);
     const msgId = uuidv4();
     const notifId = uuidv4();
-    const timeStr = apptTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    const timeStr = apptTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
 
     let deliveryStatus = 'sent';
     let errorMessage = null;
@@ -120,6 +123,7 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
       message: `Appointment at ${timeStr}${deliveryStatus === 'failed' ? ' (Delivery Failed)' : ''}`,
       whatsappLink: waLink,
       delivery_status: deliveryStatus,
+      appointment_time: appt.appointment_time,
       read: false,
       created_at: new Date().toISOString(),
     });

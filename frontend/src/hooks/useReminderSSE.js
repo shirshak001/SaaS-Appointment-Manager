@@ -26,6 +26,7 @@ export function useReminderSSE(isAuthenticated) {
         message: data.message,
         whatsappLink: data.whatsappLink,
         delivery_status: data.status,
+        appointment_time: data.appointmentTime,
         created_at: data.timestamp || new Date().toISOString(),
         read: false,
       }]);

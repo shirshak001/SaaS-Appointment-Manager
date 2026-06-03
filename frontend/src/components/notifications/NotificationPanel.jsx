@@ -37,7 +37,20 @@ function NotifItem({ notif, onRead }) {
         </p>
         {notif.message && (
           <p className="text-[11px] mt-0.5" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
-            {notif.message}
+            {(() => {
+              if (notif.type === 'reminder' && notif.appointment_time) {
+                try {
+                  const tStr = format(parseISO(notif.appointment_time), 'h:mm a');
+                  const isFailed = notif.message.includes('(Delivery Failed)');
+                  if (notif.message.includes(' — ')) {
+                    const namePart = notif.message.split(' — ')[0];
+                    return `${namePart} — appointment at ${tStr}${isFailed ? ' (Delivery Failed)' : ''}`;
+                  }
+                  return `Appointment at ${tStr}${isFailed ? ' (Delivery Failed)' : ''}`;
+                } catch (_) {}
+              }
+              return notif.message;
+            })()}
           </p>
         )}
         {notif.whatsappLink && notif.delivery_status !== 'delivered' && (

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { format, parseISO } from 'date-fns';
-import { ArrowLeft, Phone, Calendar, FileText, Send, Pencil, X, Check, Clock, MessageSquare, User, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Phone, Calendar, FileText, Send, Pencil, X, Check, Clock, MessageSquare, User, AlertTriangle, Zap } from 'lucide-react';
 import ReminderTimeline from '../components/reminders/ReminderTimeline';
 import { SkeletonCard } from '../components/ui/Skeleton';
 
@@ -33,6 +33,7 @@ export default function AppointmentDetails() {
   const [cancelling, setCancelling] = useState(false);
   const [whatsappReply, setWhatsappReply] = useState(null);
   const [markingNoShow, setMarkingNoShow] = useState(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const loadAppt = () => {
     api.getAppointment(id)
@@ -398,55 +399,6 @@ export default function AppointmentDetails() {
 
         {/* Right panel */}
         <div className="space-y-4">
-          {/* Actions */}
-          <div className="card p-5">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
-              Actions
-            </p>
-            <div className="space-y-2">
-              {!isCancelled && appt.status !== 'completed' && appt.status !== 'no_show' && (
-                <>
-                  <button
-                    onClick={handleSendReminder}
-                    disabled={sendingReminder}
-                    className="btn-md btn-primary w-full justify-start"
-                  >
-                    <Send className="w-4 h-4" strokeWidth={1.75} />
-                    {sendingReminder ? 'Sending...' : 'Send reminder now'}
-                  </button>
-                  <button
-                    onClick={handleMarkNoShow}
-                    disabled={markingNoShow}
-                    className="btn-md btn-secondary w-full justify-start"
-                  >
-                    <AlertTriangle className="w-4 h-4" strokeWidth={1.75} />
-                    {markingNoShow ? 'Marking...' : 'Mark no-show'}
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    disabled={cancelling}
-                    className="btn-md btn-danger w-full justify-start"
-                  >
-                    <X className="w-4 h-4" strokeWidth={2} />
-                    {cancelling ? 'Cancelling...' : 'Cancel appointment'}
-                  </button>
-                </>
-              )}
-              {(isCancelled || appt.status === 'no_show') && (
-                <div className="px-3 py-3 rounded-xl bg-danger-light text-center">
-                  <p className="text-xs font-medium text-danger capitalize">{appt.status.replace('_', '-')}</p>
-                </div>
-              )}
-              {/* CRM link */}
-              <button
-                onClick={() => navigate(`/customers/${encodeURIComponent(appt.phone)}`)}
-                className="btn-md btn-ghost w-full justify-start"
-              >
-                <User className="w-4 h-4" strokeWidth={1.75} />
-                View customer profile
-              </button>
-            </div>
-          </div>
 
           {/* WhatsApp simulation */}
           {!isCancelled && appt.status !== 'completed' && (
@@ -505,6 +457,83 @@ export default function AppointmentDetails() {
             </p>
           </div>
         </div>
+      </div>
+      {/* Floating Collapsible Actions (Bottom Right) */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+        {actionsOpen && (
+          <div 
+            className="card p-3 shadow-2xl flex flex-col gap-1.5 w-56 mb-1 transition-all animate-fade-in"
+            style={{ 
+              backgroundColor: 'rgb(var(--clr-surface-overlay) / 0.95)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgb(var(--clr-border))',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+            }}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 mb-0.5" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
+              Actions
+            </p>
+            
+            {!isCancelled && appt.status !== 'completed' && appt.status !== 'no_show' && (
+              <>
+                <button
+                  onClick={() => { handleSendReminder(); setActionsOpen(false); }}
+                  disabled={sendingReminder}
+                  className="btn-sm btn-primary w-full justify-start py-2 px-3"
+                >
+                  <Send className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  {sendingReminder ? 'Sending...' : 'Send reminder now'}
+                </button>
+                <button
+                  onClick={() => { handleMarkNoShow(); setActionsOpen(false); }}
+                  disabled={markingNoShow}
+                  className="btn-sm btn-secondary w-full justify-start py-2 px-3"
+                >
+                  <AlertTriangle className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  {markingNoShow ? 'Marking...' : 'Mark no-show'}
+                </button>
+                <button
+                  onClick={() => { handleCancel(); setActionsOpen(false); }}
+                  disabled={cancelling}
+                  className="btn-sm btn-danger w-full justify-start py-2 px-3"
+                >
+                  <X className="w-3.5 h-3.5" strokeWidth={2} />
+                  {cancelling ? 'Cancelling...' : 'Cancel appointment'}
+                </button>
+              </>
+            )}
+            
+            {(isCancelled || appt.status === 'no_show') && (
+              <div className="px-2.5 py-1.5 rounded-lg text-center mb-0.5" style={{ backgroundColor: 'rgb(var(--clr-danger-light))' }}>
+                <p className="text-[10px] font-semibold text-danger capitalize">{appt.status.replace('_', '-')}</p>
+              </div>
+            )}
+
+            <button
+              onClick={() => { navigate(`/customers/${encodeURIComponent(appt.phone)}`); setActionsOpen(false); }}
+              className="btn-sm btn-ghost w-full justify-start py-2 px-3"
+            >
+              <User className="w-3.5 h-3.5" strokeWidth={1.75} />
+              View customer profile
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => setActionsOpen(!actionsOpen)}
+          className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 focus:outline-none hover:scale-105"
+          style={{
+            backgroundColor: actionsOpen ? 'rgb(var(--clr-ink))' : 'rgb(var(--clr-primary))',
+            color: actionsOpen ? 'rgb(var(--clr-surface))' : '#ffffff',
+            boxShadow: '0 4px 15px -3px rgb(var(--clr-primary) / 0.4)'
+          }}
+          title="Appointment Actions"
+        >
+          <Zap 
+            className={`w-5 h-5 transition-transform duration-300 ${actionsOpen ? 'rotate-45' : ''}`} 
+            strokeWidth={2.25} 
+          />
+        </button>
       </div>
     </div>
   );

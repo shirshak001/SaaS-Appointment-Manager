@@ -38,7 +38,10 @@ async function sendWhatsApp(to, body) {
 
   // 1. Meta WhatsApp Cloud API (100% Free Tier available)
   if (metaAccessToken && metaPhoneId && !metaAccessToken.startsWith('your_meta_')) {
-    const cleanedTo = to.replace(/\D/g, ''); // Digits only (e.g. 919876543210)
+    let cleanedTo = to.replace(/\D/g, ''); // Digits only
+    if (cleanedTo.length === 10) {
+      cleanedTo = '91' + cleanedTo;
+    }
     
     try {
       const response = await fetch(`https://graph.facebook.com/v18.0/${metaPhoneId}/messages`, {
@@ -78,7 +81,11 @@ async function sendWhatsApp(to, body) {
   const twilioFrom = process.env.TWILIO_WHATSAPP_NUMBER;
 
   if (client && twilioFrom && !twilioFrom.startsWith('whatsapp:+14155238886')) {
-    const formattedTo = to.startsWith('whatsapp:') ? to : `whatsapp:${to}`;
+    let cleanedTo = to.replace(/\D/g, '');
+    if (cleanedTo.length === 10) {
+      cleanedTo = '91' + cleanedTo;
+    }
+    const formattedTo = `whatsapp:+${cleanedTo}`;
     const formattedFrom = twilioFrom.startsWith('whatsapp:') ? twilioFrom : `whatsapp:${twilioFrom}`;
 
     try {
