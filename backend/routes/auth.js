@@ -43,4 +43,46 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// POST /api/auth/register
+router.post('/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email and password are required' });
+    }
+
+    const emailClean = email.toLowerCase().trim();
+    const existing = await db.users.findOne({ email: emailClean });
+    if (existing) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+
+    const { v4: uuidv4 } = require('uuid');
+    const hashed = bcrypt.hashSync(password, 10);
+    const userId = uuidv4();
+
+    await db.users.insert({
+      _id: userId,
+      email: emailClean,
+      password: hashed,
+      name: name.trim(),
+      role: 'admin',
+      created_at: new Date().toISOString(),
+    });
+
+    const token = jwt.sign(
+      { id: userId, email: emailClean, name: name.trim(), role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      token,
+      user: { id: userId, email: emailClean, name: name.trim(), role: 'admin' }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

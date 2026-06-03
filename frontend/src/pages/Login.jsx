@@ -6,25 +6,37 @@ import { useTheme } from '../context/ThemeContext';
 import { Zap, Sun, Moon } from 'lucide-react';
 
 export default function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const { addToast } = useToast();
   const { toggle, isDark } = useTheme();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ email: 'admin@reminderflow.com', password: 'admin123' });
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [form, setForm] = useState({ name: '', email: 'admin@reminderflow.com', password: 'admin123' });
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
+  const toggleMode = () => {
+    setIsSignUp(p => !p);
+    setError('');
+    setForm({ name: '', email: '', password: '' });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      addToast({ type: 'success', title: 'Welcome back', message: 'Signed in successfully.' });
+      if (isSignUp) {
+        await register(form.name, form.email, form.password);
+        addToast({ type: 'success', title: 'Welcome', message: 'Account created successfully.' });
+      } else {
+        await login(form.email, form.password);
+        addToast({ type: 'success', title: 'Welcome back', message: 'Signed in successfully.' });
+      }
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Invalid credentials');
@@ -67,13 +79,28 @@ export default function Login() {
             className="text-2xl font-display font-semibold mb-1"
             style={{ color: 'rgb(var(--clr-ink))' }}
           >
-            Sign in
+            {isSignUp ? 'Create your account' : 'Sign in'}
           </h1>
           <p className="text-sm mb-8" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
-            Enter your credentials to access the dashboard.
+            {isSignUp ? 'Get started with a new staff or admin account.' : 'Enter your credentials to access the dashboard.'}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <div>
+                <label htmlFor="name" className="input-label">Full name</label>
+                <input
+                  id="name"
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="Enter your name"
+                  className="input"
+                  required
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="input-label">Email address</label>
               <input
@@ -114,22 +141,24 @@ export default function Login() {
               </div>
             )}
 
-            <div className="flex items-center gap-2">
-              <input
-                id="remember"
-                type="checkbox"
-                checked={remember}
-                onChange={e => setRemember(e.target.checked)}
-                className="w-4 h-4 rounded cursor-pointer accent-blue-600"
-              />
-              <label
-                htmlFor="remember"
-                className="text-xs cursor-pointer select-none"
-                style={{ color: 'rgb(var(--clr-ink-secondary))' }}
-              >
-                Remember me for 7 days
-              </label>
-            </div>
+            {!isSignUp && (
+              <div className="flex items-center gap-2">
+                <input
+                  id="remember"
+                  type="checkbox"
+                  checked={remember}
+                  onChange={e => setRemember(e.target.checked)}
+                  className="w-4 h-4 rounded cursor-pointer accent-blue-600"
+                />
+                <label
+                  htmlFor="remember"
+                  className="text-xs cursor-pointer select-none"
+                  style={{ color: 'rgb(var(--clr-ink-secondary))' }}
+                >
+                  Remember me for 7 days
+                </label>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -139,23 +168,37 @@ export default function Login() {
               {loading ? (
                 <>
                   <span className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                  Signing in...
+                  {isSignUp ? 'Creating account...' : 'Signing in...'}
                 </>
-              ) : 'Sign in'}
+              ) : (isSignUp ? 'Create account' : 'Sign in')}
             </button>
           </form>
 
-          <div
-            className="mt-8 pt-6"
-            style={{ borderTop: '1px solid rgb(var(--clr-border))' }}
-          >
-            <p
-              className="text-xs text-center"
-              style={{ color: 'rgb(var(--clr-ink-ghost))' }}
+          <p className="text-xs text-center mt-6" style={{ color: 'rgb(var(--clr-ink-secondary))' }}>
+            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="font-semibold text-primary hover:underline focus:outline-none"
+              style={{ color: 'rgb(var(--clr-primary))' }}
             >
-              Demo credentials pre-filled above
-            </p>
-          </div>
+              {isSignUp ? 'Sign in' : 'Sign up'}
+            </button>
+          </p>
+
+          {!isSignUp && (
+            <div
+              className="mt-8 pt-6"
+              style={{ borderTop: '1px solid rgb(var(--clr-border))' }}
+            >
+              <p
+                className="text-xs text-center"
+                style={{ color: 'rgb(var(--clr-ink-ghost))' }}
+              >
+                Demo credentials pre-filled above
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

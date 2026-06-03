@@ -29,13 +29,20 @@ export function AuthProvider({ children }) {
     return user;
   }, []);
 
+  const register = useCallback(async (name, email, password) => {
+    const { token, user } = await api.register(name, email, password);
+    localStorage.setItem('rf_token', token);
+    setUser(user);
+    return user;
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem('rf_token');
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
