@@ -3,7 +3,7 @@ const BASE = API_URL ? `${API_URL}/api` : '/api';
 console.log('[ReminderFlow API] Base URL configured as:', BASE);
 
 function getToken() {
-  return localStorage.getItem('rf_token');
+  return localStorage.getItem('rf_token') || sessionStorage.getItem('rf_token');
 }
 
 async function request(path, options = {}) {

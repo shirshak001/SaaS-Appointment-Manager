@@ -34,7 +34,7 @@ export function useReminderSSE(isAuthenticated) {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const token = localStorage.getItem('rf_token');
+    const token = localStorage.getItem('rf_token') || sessionStorage.getItem('rf_token');
     if (!token) return;
 
     const apiUrl = import.meta.env.VITE_API_URL || 'https://saas-appointment-manager.onrender.com';
