@@ -36,7 +36,7 @@ export function useReminderSSE(isAuthenticated) {
     const token = localStorage.getItem('rf_token');
     if (!token) return;
 
-    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://saas-appointment-manager.onrender.com';
     const es = new EventSource(`${apiUrl}/api/events?token=${token}`);
     esRef.current = es;
 
