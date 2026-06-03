@@ -17,11 +17,16 @@ export default function ReminderTimeline({ appointment, reminderStages = [], onR
     setSending(true);
     try {
       const res = await api.sendReminder(appointment.id);
+      const isDelivered = res.deliveryStatus === 'delivered';
       addToast({
         type: 'success',
-        title: 'Reminder sent',
-        message: 'WhatsApp message queued.',
-        action: res.whatsappLink ? { href: res.whatsappLink, label: 'Open WhatsApp' } : undefined,
+        title: isDelivered ? 'Reminder sent' : 'Reminder triggered',
+        message: isDelivered
+          ? 'Reminder sent automatically.'
+          : 'WhatsApp message queued.',
+        action: isDelivered
+          ? undefined
+          : (res.whatsappLink ? { href: res.whatsappLink, label: 'Open WhatsApp' } : undefined),
         duration: 8000,
       });
       onReminderSent?.();

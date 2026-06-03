@@ -8,15 +8,15 @@ export function useReminderSSE(isAuthenticated) {
 
   const handleEvent = useCallback((data) => {
     if (data.type === 'reminder') {
+      const isDelivered = data.status === 'delivered';
       addToast({
         type: 'reminder',
         title: data.title || `Reminder sent to ${data.customerName}`,
-        message: data.message,
+        message: isDelivered ? `Reminder sent automatically via WhatsApp.` : data.message,
         duration: 10000,
-        action: {
-          href: data.whatsappLink,
-          label: 'Open in WhatsApp',
-        },
+        action: isDelivered
+          ? undefined
+          : (data.whatsappLink ? { href: data.whatsappLink, label: 'Open in WhatsApp' } : undefined),
       });
 
       setLiveNotifs(prev => [...prev, {
@@ -25,6 +25,7 @@ export function useReminderSSE(isAuthenticated) {
         title: data.title || `Reminder sent to ${data.customerName}`,
         message: data.message,
         whatsappLink: data.whatsappLink,
+        delivery_status: data.status,
         created_at: data.timestamp || new Date().toISOString(),
         read: false,
       }]);

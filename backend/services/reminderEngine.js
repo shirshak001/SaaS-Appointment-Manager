@@ -120,6 +120,8 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
       type: 'reminder',
       title: `${stage === '24h' ? '24h' : stage === '1h' ? '1h' : '15min'} reminder sent to ${appt.customer_name}`,
       message: `Appointment at ${timeStr}${deliveryStatus === 'failed' ? ' (Delivery Failed)' : ''}`,
+      whatsappLink: waLink,
+      delivery_status: deliveryStatus,
       read: false,
       created_at: new Date().toISOString(),
     });

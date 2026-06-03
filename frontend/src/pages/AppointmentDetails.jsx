@@ -83,11 +83,16 @@ export default function AppointmentDetails() {
       setAppt(p => ({ ...p, reminder_sent: 1 }));
       const refreshed = await api.getAppointment(id);
       setMessages(refreshed.messages);
+      const isDelivered = res.deliveryStatus === 'delivered';
       addToast({
         type: 'success',
-        title: 'Reminder triggered',
-        message: `Message logged for ${appt.customer_name}.`,
-        action: res.whatsappLink ? { href: res.whatsappLink, label: 'Open in WhatsApp' } : undefined,
+        title: isDelivered ? 'Reminder sent' : 'Reminder triggered',
+        message: isDelivered
+          ? `Reminder sent automatically via WhatsApp.`
+          : `Message logged for ${appt.customer_name}.`,
+        action: isDelivered
+          ? undefined
+          : (res.whatsappLink ? { href: res.whatsappLink, label: 'Open in WhatsApp' } : undefined),
         duration: 10000,
       });
     } catch (err) {

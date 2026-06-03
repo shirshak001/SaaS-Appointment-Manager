@@ -138,11 +138,16 @@ export default function CreateAppointment() {
         appointment_time,
         notes: form.notes.trim(),
       });
+      const isDelivered = res.deliveryStatus === 'delivered';
       addToast({
         type: 'success',
         title: 'Appointment created',
-        message: `Confirmation queued for ${form.customer_name.split(' ')[0]}.`,
-        action: res.whatsappLink ? { href: res.whatsappLink, label: 'Send via WhatsApp' } : undefined,
+        message: isDelivered
+          ? `Confirmation sent automatically via WhatsApp.`
+          : `Confirmation queued for ${form.customer_name.split(' ')[0]}.`,
+        action: isDelivered
+          ? undefined
+          : (res.whatsappLink ? { href: res.whatsappLink, label: 'Send via WhatsApp' } : undefined),
         duration: 8000,
       });
       navigate(`/appointments/${res.appointment.id}`);
