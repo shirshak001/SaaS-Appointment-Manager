@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL || '';
 const BASE = API_URL ? `${API_URL}/api` : '/api';
+console.log('[ReminderFlow API] Base URL configured as:', BASE);
 
 function getToken() {
   return localStorage.getItem('rf_token');
