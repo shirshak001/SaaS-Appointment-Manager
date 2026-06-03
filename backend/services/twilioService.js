@@ -39,6 +39,11 @@ async function sendWhatsApp(to, body) {
   // 1. Meta WhatsApp Cloud API (100% Free Tier available)
   if (metaAccessToken && metaPhoneId && !metaAccessToken.startsWith('your_meta_')) {
     let cleanedTo = to.replace(/\D/g, ''); // Digits only
+    if (cleanedTo.startsWith('0091')) {
+      cleanedTo = cleanedTo.substring(4);
+    } else if (cleanedTo.startsWith('0') && cleanedTo.length === 11) {
+      cleanedTo = cleanedTo.substring(1);
+    }
     if (cleanedTo.length === 10) {
       cleanedTo = '91' + cleanedTo;
     }
@@ -82,6 +87,11 @@ async function sendWhatsApp(to, body) {
 
   if (client && twilioFrom && !twilioFrom.startsWith('whatsapp:+14155238886')) {
     let cleanedTo = to.replace(/\D/g, '');
+    if (cleanedTo.startsWith('0091')) {
+      cleanedTo = cleanedTo.substring(4);
+    } else if (cleanedTo.startsWith('0') && cleanedTo.length === 11) {
+      cleanedTo = cleanedTo.substring(1);
+    }
     if (cleanedTo.length === 10) {
       cleanedTo = '91' + cleanedTo;
     }

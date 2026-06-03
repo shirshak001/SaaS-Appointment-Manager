@@ -44,6 +44,11 @@ function buildConfirmationMessage(appt, settings) {
 
 function generateWhatsAppLink(phone, message) {
   let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('0091')) {
+    cleaned = cleaned.substring(4);
+  } else if (cleaned.startsWith('0') && cleaned.length === 11) {
+    cleaned = cleaned.substring(1);
+  }
   if (cleaned.length === 10) {
     cleaned = '91' + cleaned;
   }
