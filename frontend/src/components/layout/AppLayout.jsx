@@ -6,7 +6,7 @@ import Topbar from './Topbar';
 import { useReminderSSE } from '../../hooks/useReminderSSE';
 
 export default function AppLayout() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const { liveNotifs } = useReminderSSE(isAuthenticated);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -30,6 +30,7 @@ export default function AppLayout() {
   }
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user && user.verified === false) return <Navigate to="/verify-email" replace />;
 
   return (
     <div

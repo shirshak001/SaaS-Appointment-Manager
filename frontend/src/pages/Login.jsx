@@ -13,7 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [isSignUp, setIsSignUp] = useState(false);
-  const [form, setForm] = useState({ name: '', email: 'admin@reminderflow.com', password: 'admin123' });
+  const [form, setForm] = useState({ name: '', email: 'admin@reminderflow.com', password: 'admin123', role: 'admin' });
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ export default function Login() {
   const toggleMode = () => {
     setIsSignUp(p => !p);
     setError('');
-    setForm({ name: '', email: '', password: '' });
+    setForm({ name: '', email: '', password: '', role: 'admin' });
   };
 
   const handleSubmit = async (e) => {
@@ -32,15 +32,21 @@ export default function Login() {
     setLoading(true);
     try {
       if (isSignUp) {
-        await register(form.name, form.email, form.password, remember);
-        addToast({ type: 'success', title: 'Welcome', message: 'Account created successfully.' });
+        await register(form.name, form.email, form.password, form.role, remember);
+        addToast({ type: 'success', title: 'Verification Code Sent', message: 'Check your email/console for the code.' });
+        navigate(`/verify-email?email=${encodeURIComponent(form.email)}`);
       } else {
         await login(form.email, form.password, remember);
         addToast({ type: 'success', title: 'Welcome back', message: 'Signed in successfully.' });
+        navigate('/dashboard');
       }
-      navigate('/dashboard');
     } catch (err) {
-      setError(err.message || 'Invalid credentials');
+      if (err.status === 403) {
+        addToast({ type: 'warning', title: 'Verification Required', message: 'Please verify your email.' });
+        navigate(`/verify-email?email=${encodeURIComponent(err.email || form.email)}`);
+      } else {
+        setError(err.message || 'Invalid credentials');
+      }
     } finally {
       setLoading(false);
     }
@@ -99,17 +105,34 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
-              <div>
-                <label htmlFor="name" className="input-label">Full name</label>
-                <input
-                  id="name"
-                  type="text"
-                  value={form.name}
-                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-                  placeholder="Enter your name"
-                  className="input"
-                  required
-                />
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="input-label">Full name</label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={form.name}
+                    onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                    placeholder="Enter your name"
+                    className="input"
+                    required
+                  />
+                </div>
+                {!supabase && (
+                  <div>
+                    <label htmlFor="role" className="input-label">Role</label>
+                    <select
+                      id="role"
+                      value={form.role}
+                      onChange={e => setForm(p => ({ ...p, role: e.target.value }))}
+                      className="input animate-fade-in"
+                      style={{ appearance: 'none', backgroundPosition: 'right 0.75rem center' }}
+                    >
+                      <option value="admin">Administrator</option>
+                      <option value="staff">Staff Member</option>
+                    </select>
+                  </div>
+                )}
               </div>
             )}
 
@@ -128,7 +151,19 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="password" className="input-label">Password</label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="input-label">Password</label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/forgot-password')}
+                    className="text-xs font-semibold text-primary hover:underline focus:outline-none"
+                    style={{ color: 'rgb(var(--clr-primary))' }}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <input
                 id="password"
                 type="password"

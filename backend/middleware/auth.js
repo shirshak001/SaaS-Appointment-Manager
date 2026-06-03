@@ -59,4 +59,20 @@ async function authenticate(req, res, next) {
   }
 }
 
-module.exports = { authenticate };
+function authorize(roles = []) {
+  const rolesArray = typeof roles === 'string' ? [roles] : roles;
+  return [
+    authenticate,
+    (req, res, next) => {
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+      if (rolesArray.length && !rolesArray.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Forbidden: Access denied' });
+      }
+      next();
+    }
+  ];
+}
+
+module.exports = { authenticate, authorize };

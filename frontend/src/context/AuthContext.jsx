@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
             email: session.user.email,
             name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
             role: 'admin',
+            verified: !!session.user.email_confirmed_at,
           };
           setUser(userObj);
           localStorage.setItem('rf_token', session.access_token);
@@ -57,6 +58,7 @@ export function AuthProvider({ children }) {
         email: session.user.email,
         name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
         role: 'admin',
+        verified: !!session.user.email_confirmed_at,
       };
       setUser(userObj);
       localStorage.setItem('rf_token', session.access_token);
@@ -75,13 +77,13 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const register = useCallback(async (name, email, password, remember = true) => {
+  const register = useCallback(async (name, email, password, role = 'admin', remember = true) => {
     if (supabase) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { name },
+          data: { name, role },
         },
       });
       if (error) throw error;
@@ -94,12 +96,13 @@ export function AuthProvider({ children }) {
         email: session.user.email,
         name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
         role: 'admin',
+        verified: !!session.user.email_confirmed_at,
       };
       setUser(userObj);
       localStorage.setItem('rf_token', session.access_token);
       return userObj;
     } else {
-      const { token, user } = await api.register(name, email, password);
+      const { token, user } = await api.register(name, email, password, role);
       if (remember) {
         localStorage.setItem('rf_token', token);
         sessionStorage.removeItem('rf_token');
@@ -109,6 +112,80 @@ export function AuthProvider({ children }) {
       }
       setUser(user);
       return user;
+    }
+  }, []);
+
+  const verifyEmail = useCallback(async (email, code) => {
+    if (supabase) {
+      const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: 'signup' });
+      if (error) throw error;
+      const session = data.session;
+      const userObj = {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.user_metadata?.name || session.user.email?.split('@')[0],
+        role: 'admin',
+        verified: true,
+      };
+      setUser(userObj);
+      localStorage.setItem('rf_token', session.access_token);
+      return userObj;
+    } else {
+      const { token, user } = await api.verifyEmail(email, code);
+      localStorage.setItem('rf_token', token);
+      setUser(user);
+      return user;
+    }
+  }, []);
+
+  const resendVerification = useCallback(async (email) => {
+    if (supabase) {
+      const { error } = await supabase.auth.resend({ type: 'signup', email });
+      if (error) throw error;
+      return { success: true };
+    } else {
+      return await api.resendVerification(email);
+    }
+  }, []);
+
+  const forgotPassword = useCallback(async (email) => {
+    if (supabase) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      return { success: true };
+    } else {
+      return await api.forgotPassword(email);
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (email, token, password) => {
+    if (supabase) {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) throw error;
+      return { success: true };
+    } else {
+      return await api.resetPassword(email, token, password);
+    }
+  }, []);
+
+  const getSessions = useCallback(async () => {
+    if (supabase) {
+      return {
+        sessions: [
+          {
+            id: 'current-session',
+            ip: 'Dynamic IP',
+            userAgent: navigator.userAgent,
+            isCurrent: true,
+            loggedInAt: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 3600 * 1000 * 24 * 7).toISOString(),
+          }
+        ]
+      };
+    } else {
+      return await api.getSessions();
     }
   }, []);
 
@@ -134,7 +211,20 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, signInWithGoogle, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{
+      user,
+      loading,
+      login,
+      register,
+      verifyEmail,
+      resendVerification,
+      forgotPassword,
+      resetPassword,
+      getSessions,
+      logout,
+      signInWithGoogle,
+      isAuthenticated: !!user
+    }}>
       {children}
     </AuthContext.Provider>
   );

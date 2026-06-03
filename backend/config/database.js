@@ -27,6 +27,7 @@ async function initDb() {
       password: hashed,
       name: 'Admin User',
       role: 'admin',
+      verified: true,
       created_at: new Date().toISOString(),
     });
     console.log('[DB] Admin user seeded');

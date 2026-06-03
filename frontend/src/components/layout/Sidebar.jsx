@@ -66,7 +66,16 @@ export default function Sidebar({ onClose }) {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-4">
-        {navGroups.map(group => (
+        {navGroups.map(group => {
+          const items = group.items.filter(item => {
+            if (item.to === '/settings' || item.to === '/reports') {
+              return user?.role === 'admin';
+            }
+            return true;
+          });
+          if (items.length === 0) return null;
+          return { ...group, items };
+        }).filter(Boolean).map(group => (
           <div key={group.label}>
             <p
               className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest"

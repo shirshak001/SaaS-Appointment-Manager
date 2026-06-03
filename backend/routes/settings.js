@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
-const { authenticate } = require('../middleware/auth');
+const { authorize } = require('../middleware/auth');
 
 // GET /api/settings
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authorize('admin'), async (req, res) => {
   try {
     const settings = await db.settings.findOne({ _id: 'default' });
     res.json({ settings });
@@ -14,7 +14,7 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // PUT /api/settings
-router.put('/', authenticate, async (req, res) => {
+router.put('/', authorize('admin'), async (req, res) => {
   try {
     const { business_name, support_number, business_address, reminder_before_minutes } = req.body;
     const update = {};
@@ -32,7 +32,7 @@ router.put('/', authenticate, async (req, res) => {
 });
 
 // POST /api/settings/reset-database
-router.post('/reset-database', authenticate, async (req, res) => {
+router.post('/reset-database', authorize('admin'), async (req, res) => {
   try {
     // Delete all records in appointments, messages, notes, and notifications
     await Promise.all([

@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { db } = require('../config/database');
-const { authenticate } = require('../middleware/auth');
+const { authorize } = require('../middleware/auth');
 
 // ─── GET /api/reports/summary ────────────────────────────────────────────────
 // Overall business summary statistics
-router.get('/summary', authenticate, async (req, res) => {
+router.get('/summary', authorize('admin'), async (req, res) => {
   try {
     const [appointments, messages] = await Promise.all([
       db.appointments.find({}),
@@ -54,7 +54,7 @@ router.get('/summary', authenticate, async (req, res) => {
 // ─── GET /api/reports/appointments ──────────────────────────────────────────
 // Filtered appointment list for export
 // Query params: from (ISO), to (ISO), status
-router.get('/appointments', authenticate, async (req, res) => {
+router.get('/appointments', authorize('admin'), async (req, res) => {
   try {
     const { from, to, status } = req.query;
 
