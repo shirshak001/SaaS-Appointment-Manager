@@ -32,7 +32,7 @@ function getTwilioClient() {
  * @param {string} body - The message content
  * @returns {Promise<{success: boolean, sid?: string, mock?: boolean, error?: string}>}
  */
-async function sendWhatsApp(to, body) {
+async function sendWhatsApp(to, body, templateOptions = null) {
   const metaAccessToken = process.env.META_ACCESS_TOKEN;
   const metaPhoneId = process.env.META_PHONE_NUMBER_ID;
 
@@ -49,22 +49,44 @@ async function sendWhatsApp(to, body) {
     }
     
     try {
+      const payload = {
+        messaging_product: "whatsapp",
+        recipient_type: "individual",
+        to: cleanedTo
+      };
+
+      if (templateOptions && templateOptions.name) {
+        payload.type = "template";
+        payload.template = {
+          name: templateOptions.name,
+          language: {
+            code: templateOptions.languageCode || 'en_US'
+          },
+          components: [
+            {
+              type: "body",
+              parameters: templateOptions.parameters.map(param => ({
+                type: "text",
+                text: String(param)
+              }))
+            }
+          ]
+        };
+      } else {
+        payload.type = "text";
+        payload.text = {
+          preview_url: false,
+          body: body
+        };
+      }
+
       const response = await fetch(`https://graph.facebook.com/v18.0/${metaPhoneId}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${metaAccessToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          messaging_product: "whatsapp",
-          recipient_type: "individual",
-          to: cleanedTo,
-          type: "text",
-          text: {
-            preview_url: false,
-            body: body
-          }
-        })
+        body: JSON.stringify(payload)
       });
       
       const resData = await response.json();

@@ -97,7 +97,28 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
     let errorMessage = null;
     let messageSid = null;
 
-    const result = await sendWhatsApp(appt.phone, message);
+    let templateOptions = null;
+    if (process.env.META_REMINDER_TEMPLATE_NAME) {
+      const d = new Date(appt.appointment_time);
+      const timeStr = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+      const dateStr = d.toLocaleDateString('en-IN', { month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' });
+      const first = appt.customer_name.split(' ')[0];
+      const biz = settings?.business_name || 'ReminderFlow';
+      const num = settings?.support_number || '';
+      const stageText = {
+        '24h': 'tomorrow',
+        '1h':  'in 1 hour',
+        '15m': 'in 15 minutes',
+      }[stage] || 'soon';
+
+      templateOptions = {
+        name: process.env.META_REMINDER_TEMPLATE_NAME,
+        languageCode: process.env.META_TEMPLATE_LANGUAGE_CODE || 'en_US',
+        parameters: [first, biz, stageText, timeStr, dateStr, num]
+      };
+    }
+
+    const result = await sendWhatsApp(appt.phone, message, templateOptions);
     if (!result.success) {
       deliveryStatus = 'failed';
       errorMessage = result.error;
