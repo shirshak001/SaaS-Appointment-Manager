@@ -113,7 +113,8 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: userId, email: emailClean, name: name.trim(), role: userRole, verified: false }
+      user: { id: userId, email: emailClean, name: name.trim(), role: userRole, verified: false },
+      verificationCode
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -200,7 +201,7 @@ router.post('/resend-verification', async (req, res) => {
       sent_at: new Date().toISOString(),
     });
 
-    res.json({ success: true, message: 'Verification code resent successfully' });
+    res.json({ success: true, message: 'Verification code resent successfully', verificationCode });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -238,7 +239,7 @@ router.post('/forgot-password', async (req, res) => {
       sent_at: new Date().toISOString(),
     });
 
-    res.json({ success: true, message: 'Password reset code sent' });
+    res.json({ success: true, message: 'Password reset code sent', resetToken });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

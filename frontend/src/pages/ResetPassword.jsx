@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Zap, Sun, Moon, ArrowLeft, KeyRound } from 'lucide-react';
 
 export default function ResetPassword() {
-  const { resetPassword } = useAuth();
+  const { resetPassword, tempResetCode } = useAuth();
   const { addToast } = useToast();
   const { toggle, isDark } = useTheme();
   const navigate = useNavigate();
@@ -90,9 +90,24 @@ export default function ResetPassword() {
               Create New Password
             </h1>
           </div>
-          <p className="text-xs mb-8 leading-relaxed" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
+          <p className="text-xs mb-6 leading-relaxed" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
             Enter your email, reset code, and your secure new password.
           </p>
+
+          {tempResetCode && (
+            <div
+              className="mb-6 p-4 rounded-2xl border text-xs leading-relaxed animate-fade-in"
+              style={{
+                backgroundColor: 'rgb(var(--clr-primary) / 0.05)',
+                borderColor: 'rgb(var(--clr-primary) / 0.15)',
+                color: 'rgb(var(--clr-primary-600))'
+              }}
+            >
+              <p className="font-semibold mb-1">Demo/Test Mode Reset Code:</p>
+              <p className="font-mono text-base font-bold tracking-wider mb-1">{tempResetCode}</p>
+              <p className="opacity-80">Enter this code below to verify your password reset. (Displayed here for easy testing without SMTP configuration).</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

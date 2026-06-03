@@ -6,7 +6,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Zap, Sun, Moon, ShieldCheck, RefreshCw } from 'lucide-react';
 
 export default function VerifyEmail() {
-  const { verifyEmail, resendVerification } = useAuth();
+  const { verifyEmail, resendVerification, tempCode } = useAuth();
   const { addToast } = useToast();
   const { toggle, isDark } = useTheme();
   const navigate = useNavigate();
@@ -108,9 +108,24 @@ export default function VerifyEmail() {
               Verify Your Email
             </h1>
           </div>
-          <p className="text-xs mb-8 leading-relaxed" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
+          <p className="text-xs mb-6 leading-relaxed" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
             We logged a 6-digit verification code to your backend console and system messages log. Enter the code below to activate your account.
           </p>
+
+          {tempCode && (
+            <div
+              className="mb-6 p-4 rounded-2xl border text-xs leading-relaxed animate-fade-in"
+              style={{
+                backgroundColor: 'rgb(var(--clr-primary) / 0.05)',
+                borderColor: 'rgb(var(--clr-primary) / 0.15)',
+                color: 'rgb(var(--clr-primary-600))'
+              }}
+            >
+              <p className="font-semibold mb-1">Demo/Test Mode Activation Code:</p>
+              <p className="font-mono text-base font-bold tracking-wider mb-1">{tempCode}</p>
+              <p className="opacity-80">Enter this code below to verify your email. (Displayed here for easy testing without SMTP configuration).</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

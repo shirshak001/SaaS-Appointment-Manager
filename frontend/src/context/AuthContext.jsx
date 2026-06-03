@@ -7,6 +7,8 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [tempCode, setTempCode] = useState(null);
+  const [tempResetCode, setTempResetCode] = useState(null);
 
   useEffect(() => {
     if (supabase) {
@@ -102,7 +104,10 @@ export function AuthProvider({ children }) {
       localStorage.setItem('rf_token', session.access_token);
       return userObj;
     } else {
-      const { token, user } = await api.register(name, email, password, role);
+      const { token, user, verificationCode } = await api.register(name, email, password, role);
+      if (verificationCode) {
+        setTempCode(verificationCode);
+      }
       if (remember) {
         localStorage.setItem('rf_token', token);
         sessionStorage.removeItem('rf_token');
@@ -144,7 +149,11 @@ export function AuthProvider({ children }) {
       if (error) throw error;
       return { success: true };
     } else {
-      return await api.resendVerification(email);
+      const res = await api.resendVerification(email);
+      if (res.verificationCode) {
+        setTempCode(res.verificationCode);
+      }
+      return res;
     }
   }, []);
 
@@ -156,7 +165,11 @@ export function AuthProvider({ children }) {
       if (error) throw error;
       return { success: true };
     } else {
-      return await api.forgotPassword(email);
+      const res = await api.forgotPassword(email);
+      if (res.resetToken) {
+        setTempResetCode(res.resetToken);
+      }
+      return res;
     }
   }, []);
 
@@ -214,6 +227,8 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user,
       loading,
+      tempCode,
+      tempResetCode,
       login,
       register,
       verifyEmail,
