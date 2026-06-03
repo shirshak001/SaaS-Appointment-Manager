@@ -51,4 +51,14 @@ router.put('/notifications/mark-read', authenticate, async (req, res) => {
   }
 });
 
+// DELETE /api/messages/notifications/clear
+router.delete('/notifications/clear', authenticate, async (req, res) => {
+  try {
+    await db.notifications.remove({}, { multi: true });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

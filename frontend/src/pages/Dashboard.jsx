@@ -13,27 +13,22 @@ import {
 /* ---- Stat Card ---- */
 function StatCard({ label, value, sub, icon: Icon, iconBg, iconColor }) {
   return (
-    <div className="stat-card group">
-      <div className="flex items-start justify-between">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ backgroundColor: iconBg }}
-        >
-          <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} style={{ color: iconColor }} />
-        </div>
-        <TrendingUp
-          className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"
-          strokeWidth={1.5}
-          style={{ color: 'rgb(var(--clr-ink-ghost))' }}
-        />
+    <div className="stat-card group flex flex-row items-center sm:flex-col sm:items-start gap-3 p-3.5 sm:p-5">
+      <div
+        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        style={{ backgroundColor: iconBg }}
+      >
+        <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} style={{ color: iconColor }} />
       </div>
-      <div>
-        <p className="text-2xl font-display font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>
+      <div className="flex-1 min-w-0 sm:mt-1">
+        <p className="text-xl sm:text-2xl font-display font-semibold leading-tight" style={{ color: 'rgb(var(--clr-ink))' }}>
           {value}
         </p>
-        <p className="text-xs mt-0.5" style={{ color: 'rgb(var(--clr-ink-muted))' }}>{label}</p>
+        <p className="text-[11px] sm:text-xs mt-0.5 truncate" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
+          {label}
+        </p>
+        {sub && <p className="text-[10px] sm:text-[11px] mt-0.5 hidden sm:block" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>{sub}</p>}
       </div>
-      {sub && <p className="text-[11px]" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>{sub}</p>}
     </div>
   );
 }
@@ -319,7 +314,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
         <StatCard label="Total appointments" value={stats.total} sub="All time"
           icon={CalendarDays} iconBg="rgb(var(--clr-primary) / 0.1)" iconColor="rgb(var(--clr-primary-600))" />
         <StatCard label="Today" value={stats.today} sub="Scheduled for today"

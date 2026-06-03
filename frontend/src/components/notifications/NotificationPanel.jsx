@@ -113,7 +113,10 @@ export default function NotificationPanel({ liveNotifs = [], onCountChange }) {
     api.markNotificationsRead().catch(() => {});
   };
 
-  const clearAll = () => setNotifications([]);
+  const clearAll = () => {
+    setNotifications([]);
+    api.clearNotifications().catch(() => {});
+  };
 
   return (
     <div className="relative" ref={panelRef}>

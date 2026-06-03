@@ -355,7 +355,7 @@
 
   /* --- Stat card --- */
   .stat-card {
-    @apply card p-5 flex flex-col gap-3;
+    @apply card;
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
   .stat-card:hover {

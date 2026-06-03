@@ -51,6 +51,7 @@ export const api = {
   },
   getNotifications: () => request('/messages/notifications'),
   markNotificationsRead: () => request('/messages/notifications/mark-read', { method: 'PUT' }),
+  clearNotifications: () => request('/messages/notifications/clear', { method: 'DELETE' }),
 
   // Customers (CRM)
   getCustomers: () => request('/customers'),
