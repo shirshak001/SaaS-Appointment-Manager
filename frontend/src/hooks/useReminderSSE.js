@@ -36,7 +36,8 @@ export function useReminderSSE(isAuthenticated) {
     const token = localStorage.getItem('rf_token');
     if (!token) return;
 
-    const es = new EventSource(`/api/events?token=${token}`);
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    const es = new EventSource(`${apiUrl}/api/events?token=${token}`);
     esRef.current = es;
 
     es.onmessage = (e) => {

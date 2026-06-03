@@ -1,4 +1,5 @@
-const BASE = '/api';
+const API_URL = import.meta.env.VITE_API_URL || '';
+const BASE = API_URL ? `${API_URL}/api` : '/api';
 
 function getToken() {
   return localStorage.getItem('rf_token');
