@@ -3,10 +3,11 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
+import { supabase } from '../utils/supabase';
 import { Zap, Sun, Moon } from 'lucide-react';
 
 export default function Login() {
-  const { login, register, isAuthenticated } = useAuth();
+  const { login, register, signInWithGoogle, isAuthenticated } = useAuth();
   const { addToast } = useToast();
   const { toggle, isDark } = useTheme();
   const navigate = useNavigate();
@@ -41,6 +42,17 @@ export default function Login() {
     } catch (err) {
       setError(err.message || 'Invalid credentials');
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setError(err.message || 'Google sign in failed');
       setLoading(false);
     }
   };
@@ -173,6 +185,48 @@ export default function Login() {
               ) : (isSignUp ? 'Create account' : 'Sign in')}
             </button>
           </form>
+
+          {supabase && (
+            <div className="mt-4">
+              <div className="relative flex py-2.5 items-center">
+                <div className="flex-grow border-t" style={{ borderColor: 'rgb(var(--clr-border))' }} />
+                <span className="flex-shrink mx-3 text-xs" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>or continue with</span>
+                <div className="flex-grow border-t" style={{ borderColor: 'rgb(var(--clr-border))' }} />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-solid text-xs font-semibold transition-all hover:bg-neutral-50 active:scale-95 focus:outline-none"
+                style={{
+                  borderColor: 'rgb(var(--clr-border))',
+                  color: 'rgb(var(--clr-ink))',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.53 14.98 1 12 1 7.35 1 3.37 3.65 1.41 7.55l3.85 2.99C6.2 7.79 8.89 5.04 12 5.04z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.48-1.12 2.73-2.38 3.58l3.7 2.87c2.16-1.99 3.41-4.92 3.41-8.6z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.26 14.44c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.41 7.55C.51 9.35 0 11.35 0 13.5s.51 4.15 1.41 5.95l3.85-3.01z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.7-2.87c-1.03.69-2.35 1.1-4.26 1.1-3.11 0-5.8-2.75-6.74-5.5l-3.85 3.01C3.37 20.35 7.35 23 12 23z"
+                  />
+                </svg>
+                Sign in with Google
+              </button>
+            </div>
+          )}
 
           <p className="text-xs text-center mt-6" style={{ color: 'rgb(var(--clr-ink-secondary))' }}>
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
