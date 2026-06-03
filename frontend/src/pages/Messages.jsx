@@ -53,7 +53,10 @@ export default function Messages() {
   useEffect(() => { load(); }, [load]);
 
   const generateWaLink = (phone, body) => {
-    const cleaned = phone.replace(/\s+/g, '').replace(/^\+/, '');
+    let cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 10) {
+      cleaned = '91' + cleaned;
+    }
     return `https://wa.me/${cleaned}?text=${encodeURIComponent(body)}`;
   };
 
