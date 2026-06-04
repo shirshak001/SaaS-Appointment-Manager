@@ -51,7 +51,6 @@ async function sendWhatsApp(to, body, templateOptions = null) {
     try {
       const payload = {
         messaging_product: "whatsapp",
-        recipient_type: "individual",
         to: cleanedTo
       };
 
@@ -83,6 +82,7 @@ async function sendWhatsApp(to, body, templateOptions = null) {
         };
       }
 
+      console.log('[Meta WhatsApp] Sending Request Payload:', JSON.stringify(payload, null, 2));
       const response = await fetch(`https://graph.facebook.com/v25.0/${metaPhoneId}/messages`, {
         method: 'POST',
         headers: {
