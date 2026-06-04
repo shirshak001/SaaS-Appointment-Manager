@@ -1,6 +1,6 @@
 const { db } = require('../config/database');
 const { v4: uuidv4 } = require('uuid');
-const { sendWhatsApp } = require('./twilioService');
+const { sendWhatsApp, sendSMS } = require('./twilioService');
 
 const sseClients = new Set();
 
@@ -118,7 +118,16 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
       };
     }
 
-    const result = await sendWhatsApp(appt.phone, message, templateOptions);
+    let result = await sendWhatsApp(appt.phone, message, templateOptions);
+    let channel = 'whatsapp';
+
+    if (!result.success) {
+      console.log(`[SMS Fallback] WhatsApp automated reminder failed for ${appt.phone} at stage ${stage}. Attempting SMS fallback...`);
+      const smsResult = await sendSMS(appt.phone, message);
+      result = smsResult;
+      channel = 'sms';
+    }
+
     if (!result.success) {
       deliveryStatus = 'failed';
       errorMessage = result.error;
@@ -134,6 +143,7 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
       phone: appt.phone,
       message_type: `reminder_${stage}`,
       message_body: message,
+      delivery_channel: channel,
       delivery_status: deliveryStatus,
       error_message: errorMessage,
       message_sid: messageSid,

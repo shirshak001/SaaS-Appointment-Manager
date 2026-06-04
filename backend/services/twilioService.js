@@ -141,6 +141,50 @@ async function sendWhatsApp(to, body, templateOptions = null) {
   return { success: true, mock: true };
 }
 
+/**
+ * Sends a standard SMS using Twilio SMS.
+ * 
+ * @param {string} to - The recipient's phone number
+ * @param {string} body - The message content
+ * @returns {Promise<{success: boolean, sid?: string, mock?: boolean, error?: string}>}
+ */
+async function sendSMS(to, body) {
+  const client = getTwilioClient();
+  const smsFrom = process.env.TWILIO_SMS_NUMBER;
+
+  if (client && smsFrom && !smsFrom.startsWith('+1XXXXXXXXXX')) {
+    let cleanedTo = to.replace(/\D/g, ''); // Digits only
+    if (cleanedTo.startsWith('0091')) {
+      cleanedTo = cleanedTo.substring(4);
+    } else if (cleanedTo.startsWith('0') && cleanedTo.length === 11) {
+      cleanedTo = cleanedTo.substring(1);
+    }
+    if (cleanedTo.length === 10) {
+      cleanedTo = '91' + cleanedTo;
+    }
+    const formattedTo = `+${cleanedTo}`;
+
+    try {
+      const message = await client.messages.create({
+        body: body,
+        from: smsFrom,
+        to: formattedTo
+      });
+      console.log(`[Twilio SMS] Message sent to ${to}, SID: ${message.sid}`);
+      return { success: true, sid: message.sid };
+    } catch (err) {
+      console.error(`[Twilio SMS] Error details:`, err);
+      console.error(`[Twilio SMS] Failed to send to ${to}:`, err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Fallback to Mock Log (Useful for sandbox/test environments)
+  console.log(`[SMS Mock] Send to ${to}: ${body}`);
+  return { success: true, mock: true };
+}
+
 module.exports = {
-  sendWhatsApp
+  sendWhatsApp,
+  sendSMS
 };

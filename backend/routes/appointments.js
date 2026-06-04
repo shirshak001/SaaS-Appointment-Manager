@@ -5,7 +5,7 @@ const { db } = require('../config/database');
 const { authenticate } = require('../middleware/auth');
 const { buildConfirmationMessage, buildReminderMessage, generateWhatsAppLink, getReminderStages } = require('../services/reminderEngine');
 const { checkConflict } = require('../services/conflictDetector');
-const { sendWhatsApp } = require('../services/twilioService');
+const { sendWhatsApp, sendSMS } = require('../services/twilioService');
 
 // GET /api/appointments/stats
 router.get('/stats', authenticate, async (req, res) => {
@@ -137,7 +137,16 @@ router.post('/', authenticate, async (req, res) => {
       };
     }
 
-    const result = await sendWhatsApp(phone.trim(), confirmMsg, templateOptions);
+    let result = await sendWhatsApp(phone.trim(), confirmMsg, templateOptions);
+    let channel = 'whatsapp';
+
+    if (!result.success) {
+      console.log(`[SMS Fallback] WhatsApp confirmation failed for ${phone.trim()}. Attempting SMS fallback...`);
+      const smsResult = await sendSMS(phone.trim(), confirmMsg);
+      result = smsResult;
+      channel = 'sms';
+    }
+
     if (!result.success) {
       deliveryStatus = 'failed';
       errorMessage = result.error;
@@ -153,6 +162,7 @@ router.post('/', authenticate, async (req, res) => {
       phone: phone.trim(),
       message_type: 'confirmation',
       message_body: confirmMsg,
+      delivery_channel: channel,
       delivery_status: deliveryStatus,
       error_message: errorMessage,
       message_sid: messageSid,
@@ -231,7 +241,16 @@ router.post('/:id/send-reminder', authenticate, async (req, res) => {
       };
     }
 
-    const result = await sendWhatsApp(appt.phone, message, templateOptions);
+    let result = await sendWhatsApp(appt.phone, message, templateOptions);
+    let channel = 'whatsapp';
+
+    if (!result.success) {
+      console.log(`[SMS Fallback] WhatsApp reminder failed for ${appt.phone}. Attempting SMS fallback...`);
+      const smsResult = await sendSMS(appt.phone, message);
+      result = smsResult;
+      channel = 'sms';
+    }
+
     if (!result.success) {
       deliveryStatus = 'failed';
       errorMessage = result.error;
@@ -247,6 +266,7 @@ router.post('/:id/send-reminder', authenticate, async (req, res) => {
       phone: appt.phone,
       message_type: 'reminder',
       message_body: message,
+      delivery_channel: channel,
       delivery_status: deliveryStatus,
       error_message: errorMessage,
       message_sid: messageSid,
