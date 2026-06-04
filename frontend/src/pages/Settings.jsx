@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
-import { Building2, Phone, MapPin, Bell, ShieldCheck } from 'lucide-react';
+import { Building2, Phone, MapPin, Bell, ShieldCheck, Wrench } from 'lucide-react';
 
 const REMINDER_OPTIONS = [
   { value: 15, label: '15 minutes before' },
@@ -13,7 +13,7 @@ const REMINDER_OPTIONS = [
 
 export default function Settings() {
   const { addToast } = useToast();
-  const { getSessions } = useAuth();
+  const { getSessions, user } = useAuth();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -25,6 +25,13 @@ export default function Settings() {
     business_address: '',
     reminder_before_minutes: 60,
   });
+  const [testForm, setTestForm] = useState({
+    type: 'whatsapp',
+    to: '',
+    message: '',
+  });
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -251,6 +258,141 @@ export default function Settings() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Diagnostics & Message Testing */}
+      <div className="card p-5 space-y-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Wrench className="w-4 h-4" style={{ color: 'rgb(var(--clr-ink-ghost))' }} strokeWidth={1.75} />
+          <h2 className="text-sm font-semibold" style={{ color: 'rgb(var(--clr-ink))' }}>Diagnostics & Message Testing</h2>
+        </div>
+        <p className="text-xs -mt-2" style={{ color: 'rgb(var(--clr-ink-muted))' }}>
+          Directly trigger test dispatches to verify your WhatsApp templates, SMS fallbacks, and SMTP email settings.
+        </p>
+
+        <div className="space-y-3">
+          <div>
+            <label className="input-label">Channel Type</label>
+            <div className="flex gap-2">
+              {['whatsapp', 'sms', 'email'].map((type) => {
+                const isSelected = testForm.type === type;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setTestForm(p => ({
+                        ...p,
+                        type,
+                        to: type === 'email' ? (user?.email || '') : '',
+                      }));
+                      setTestResult(null);
+                    }}
+                    className="flex-1 py-2 px-3 text-xs font-semibold rounded-xl border transition-all"
+                    style={
+                      isSelected
+                        ? {
+                            borderColor: 'rgb(var(--clr-primary))',
+                            backgroundColor: 'rgb(var(--clr-primary) / 0.1)',
+                            color: 'rgb(var(--clr-primary-600))',
+                          }
+                        : {
+                            borderColor: 'rgb(var(--clr-border))',
+                            color: 'rgb(var(--clr-ink-secondary))',
+                          }
+                    }
+                  >
+                    {type.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="input-label">
+              {testForm.type === 'email' ? 'Recipient Email Address' : 'Recipient Phone Number'}
+            </label>
+            <input
+              type={testForm.type === 'email' ? 'email' : 'text'}
+              className="input font-mono"
+              placeholder={testForm.type === 'email' ? 'name@example.com' : '+91 99999 88888'}
+              value={testForm.to}
+              onChange={e => setTestForm(p => ({ ...p, to: e.target.value }))}
+              required
+            />
+            {testForm.type === 'whatsapp' && (
+              <p className="text-[10px] mt-1" style={{ color: 'rgb(var(--clr-ink-ghost))' }}>
+                Note: If a Meta Template name is set in backend configurations, this test will map template variables automatically.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="input-label">Custom Message (Optional)</label>
+            <textarea
+              className="input text-xs h-16 py-2"
+              placeholder="Leave blank for default system test message..."
+              value={testForm.message}
+              onChange={e => setTestForm(p => ({ ...p, message: e.target.value }))}
+            />
+          </div>
+
+          <div className="pt-1">
+            <button
+              type="button"
+              disabled={testing || !testForm.to}
+              onClick={async () => {
+                setTesting(true);
+                setTestResult(null);
+                try {
+                  const res = await api.testMessaging(testForm);
+                  setTestResult({ success: true, data: res });
+                  addToast({ type: 'success', title: `Test ${testForm.type} dispatched successfully!` });
+                } catch (err) {
+                  setTestResult({ success: false, error: err.message });
+                  addToast({ type: 'error', title: `Test ${testForm.type} dispatch failed`, message: err.message });
+                } finally {
+                  setTesting(false);
+                }
+              }}
+              className="px-4 py-2 text-xs font-semibold text-white bg-primary rounded-xl hover:bg-primary-600 transition-colors focus:outline-none disabled:opacity-50 flex items-center gap-2"
+            >
+              {testing ? (
+                <>
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                'Trigger Diagnostics Send'
+              )}
+            </button>
+          </div>
+
+          {testResult && (
+            <div className="mt-3 p-3.5 rounded-xl border animate-fade-in text-xs space-y-2 font-mono" style={{
+              backgroundColor: 'rgb(var(--clr-surface-overlay) / 0.3)',
+              borderColor: testResult.success ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'
+            }}>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-[11px]" style={{ color: testResult.success ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)' }}>
+                  {testResult.success ? '✓ DISPATCH OUTCOME: SUCCESS' : '✗ DISPATCH OUTCOME: FAILED'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setTestResult(null)}
+                  className="text-[10px] underline hover:no-underline"
+                  style={{ color: 'rgb(var(--clr-ink-ghost))' }}
+                >
+                  Clear Log
+                </button>
+              </div>
+              <pre className="overflow-x-auto max-h-40 p-2 rounded bg-black/5 dark:bg-white/5 text-[10px]">
+                {JSON.stringify(testResult.success ? testResult.data : { error: testResult.error }, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Danger Zone */}
