@@ -56,8 +56,8 @@ const path = require('path');
 const frontendDistPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDistPath));
 
-// For all other requests, serve index.html (client-side routing)
-app.get('*', (req, res) => {
+// For all non-API requests, serve index.html (client-side routing)
+app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(frontendDistPath, 'index.html'));
 });
 

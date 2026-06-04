@@ -94,8 +94,14 @@ async function sendWhatsApp(to, body, templateOptions = null) {
       
       const resData = await response.json();
       if (!response.ok) {
-        console.error('[Meta WhatsApp] API Error Response:', JSON.stringify(resData, null, 2));
-        throw new Error(resData.error?.message || 'Meta API error');
+        const metaError = resData.error;
+        // Error code 190 = OAuth token expired/invalid
+        if (metaError?.code === 190) {
+          console.error('[Meta WhatsApp] Access token expired or invalid (code 190). Please generate a new token from developers.facebook.com and update META_ACCESS_TOKEN in .env');
+        } else {
+          console.error('[Meta WhatsApp] API Error Response:', JSON.stringify(resData, null, 2));
+        }
+        throw new Error(metaError?.message || 'Meta API error');
       }
       
       const messageId = resData.messages?.[0]?.id;

@@ -4,6 +4,7 @@ const { db } = require('../config/database');
 const { authorize } = require('../middleware/auth');
 const { sendWhatsApp, sendSMS } = require('../services/twilioService');
 const { sendEmail } = require('../services/emailService');
+const { v4: uuidv4 } = require('uuid');
 
 // GET /api/settings
 router.get('/', authorize('admin'), async (req, res) => {
@@ -58,6 +59,8 @@ router.post('/test-messaging', authorize('admin'), async (req, res) => {
     }
 
     let result;
+    let actualChannel = type;
+
     if (type === 'whatsapp') {
       let templateOptions = null;
       if (process.env.META_CONFIRMATION_TEMPLATE_NAME) {
@@ -68,23 +71,52 @@ router.post('/test-messaging', authorize('admin'), async (req, res) => {
           parameters: isHelloWorld ? [] : ['TestUser', 'TestClinic', '12:00 PM', 'June 4', '+91 99999 88888']
         };
       }
-      result = await sendWhatsApp(to.trim(), message || 'Test WhatsApp from ReminderFlow', templateOptions);
+      result = await sendWhatsApp(to.trim(), message || 'Test WhatsApp message from ReminderFlow Diagnostics.', templateOptions);
+
+      // If WhatsApp failed, attempt SMS fallback
+      if (!result.success) {
+        console.log(`[Diagnostics] WhatsApp test failed for ${to.trim()} (${result.error}). Trying SMS fallback...`);
+        const smsResult = await sendSMS(to.trim(), message || 'Test SMS fallback from ReminderFlow Diagnostics.');
+        result = smsResult;
+        actualChannel = 'sms_fallback';
+      }
     } else if (type === 'sms') {
-      result = await sendSMS(to.trim(), message || 'Test SMS from ReminderFlow');
+      result = await sendSMS(to.trim(), message || 'Test SMS from ReminderFlow Diagnostics.');
     } else if (type === 'email') {
       result = await sendEmail({
         to: to.trim(),
-        subject: 'Test Email from ReminderFlow',
-        text: message || 'Hello, this is a diagnostic test email from your ReminderFlow instance.'
+        subject: 'ReminderFlow Diagnostic Test Email',
+        text: message || 'Hello,\n\nThis is a diagnostic test email from your ReminderFlow instance. If you received this, your SMTP configuration is working correctly.\n\nThank you.'
       });
     } else {
       return res.status(400).json({ error: `Unsupported test channel type: ${type}` });
     }
 
     if (result.success) {
-      res.json({ success: true, channel: type, result });
+      const deliveryMode = result.mock ? 'mock_console' : (result.sid ? 'live_api' : 'sent');
+      res.json({
+        success: true,
+        channel: actualChannel,
+        deliveryMode,
+        mock: !!result.mock,
+        messageId: result.sid || null,
+        note: result.mock
+          ? 'No live credentials configured — message logged to server console (mock mode).'
+          : `Message dispatched successfully via ${actualChannel}.`,
+        result
+      });
     } else {
-      res.status(500).json({ success: false, channel: type, error: result.error || 'Message dispatch failed.' });
+      // All channels failed
+      res.status(500).json({
+        success: false,
+        channel: actualChannel,
+        error: result.error || 'All message dispatch channels failed.',
+        hint: type === 'whatsapp'
+          ? 'Ensure META_ACCESS_TOKEN and META_PHONE_NUMBER_ID are set correctly in backend .env, or that Twilio credentials are configured.'
+          : type === 'email'
+          ? 'Ensure SMTP_HOST, SMTP_USER, and SMTP_PASS are configured in backend .env.'
+          : 'Ensure TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_SMS_NUMBER are set in backend .env.'
+      });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
