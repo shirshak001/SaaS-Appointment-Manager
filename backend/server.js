@@ -56,6 +56,11 @@ const path = require('path');
 const frontendDistPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendDistPath));
 
+// Catch unmatched /api/* routes and return proper JSON 404 (not HTML)
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: `API route not found: ${req.method} ${req.path}` });
+});
+
 // For all non-API requests, serve index.html (client-side routing)
 app.get(/^(?!\/api\/).*/, (req, res) => {
   res.sendFile(path.join(frontendDistPath, 'index.html'));

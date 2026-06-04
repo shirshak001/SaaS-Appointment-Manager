@@ -4,7 +4,9 @@ const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// On Render (production), set DATA_PATH env var to the persistent disk mount point (e.g. /data)
+// so database files survive server restarts. Falls back to local data/ directory.
+const DATA_DIR = process.env.DATA_PATH || path.join(__dirname, '..', 'data');
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = {
