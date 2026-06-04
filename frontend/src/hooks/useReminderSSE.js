@@ -14,9 +14,9 @@ export function useReminderSSE(isAuthenticated) {
         title: data.title || `Reminder sent to ${data.customerName}`,
         message: isDelivered ? `Reminder sent automatically via WhatsApp.` : data.message,
         duration: 10000,
-        action: isDelivered
-          ? undefined
-          : (data.whatsappLink ? { href: data.whatsappLink, label: 'Open in WhatsApp' } : undefined),
+        action: data.whatsappLink
+          ? { href: data.whatsappLink, label: 'Open in WhatsApp' }
+          : undefined,
       });
 
       setLiveNotifs(prev => [...prev, {

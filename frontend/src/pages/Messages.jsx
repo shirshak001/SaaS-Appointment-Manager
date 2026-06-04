@@ -62,7 +62,7 @@ export default function Messages() {
     if (cleaned.length === 10) {
       cleaned = '91' + cleaned;
     }
-    return `https://wa.me/${cleaned}?text=${encodeURIComponent(body)}`;
+    return `https://api.whatsapp.com/send?phone=${cleaned}&text=${encodeURIComponent(body)}`;
   };
 
   return (

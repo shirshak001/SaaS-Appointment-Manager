@@ -146,9 +146,9 @@ export default function CreateAppointment() {
         message: isDelivered
           ? `Confirmation sent automatically via WhatsApp.`
           : `Confirmation queued for ${form.customer_name.split(' ')[0]}.`,
-        action: isDelivered
-          ? undefined
-          : (res.whatsappLink ? { href: res.whatsappLink, label: 'Send via WhatsApp' } : undefined),
+        action: res.whatsappLink
+          ? { href: res.whatsappLink, label: isDelivered ? 'Open in WhatsApp' : 'Send via WhatsApp' }
+          : undefined,
         duration: 8000,
       });
       navigate(`/appointments/${res.appointment.id}`);

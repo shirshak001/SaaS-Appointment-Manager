@@ -24,9 +24,9 @@ export default function ReminderTimeline({ appointment, reminderStages = [], onR
         message: isDelivered
           ? 'Reminder sent automatically.'
           : 'WhatsApp message queued.',
-        action: isDelivered
-          ? undefined
-          : (res.whatsappLink ? { href: res.whatsappLink, label: 'Open WhatsApp' } : undefined),
+        action: res.whatsappLink
+          ? { href: res.whatsappLink, label: 'Open WhatsApp' }
+          : undefined,
         duration: 8000,
       });
       onReminderSent?.();

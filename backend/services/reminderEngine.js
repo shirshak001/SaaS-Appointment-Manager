@@ -52,7 +52,7 @@ function generateWhatsAppLink(phone, message) {
   if (cleaned.length === 10) {
     cleaned = '91' + cleaned;
   }
-  return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+  return `https://api.whatsapp.com/send?phone=${cleaned}&text=${encodeURIComponent(message)}`;
 }
 
 // Returns reminder stage info for an appointment

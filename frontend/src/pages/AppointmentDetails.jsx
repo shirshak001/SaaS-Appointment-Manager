@@ -17,6 +17,20 @@ function DeliveryBadge({ status }) {
   return <span className={`badge ${map[status] || 'badge-pending'}`}>{status}</span>;
 }
 
+const getWhatsAppLink = (phone, message = '') => {
+  if (!phone) return '';
+  let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('0091')) {
+    cleaned = cleaned.substring(4);
+  } else if (cleaned.startsWith('0') && cleaned.length === 11) {
+    cleaned = cleaned.substring(1);
+  }
+  if (cleaned.length === 10) {
+    cleaned = '91' + cleaned;
+  }
+  return `https://api.whatsapp.com/send?phone=${cleaned}${message ? `&text=${encodeURIComponent(message)}` : ''}`;
+};
+
 export default function AppointmentDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -100,9 +114,9 @@ export default function AppointmentDetails() {
         message: isDelivered
           ? `Reminder sent automatically via WhatsApp.`
           : `Message logged for ${appt.customer_name}.`,
-        action: isDelivered
-          ? undefined
-          : (res.whatsappLink ? { href: res.whatsappLink, label: 'Open in WhatsApp' } : undefined),
+        action: res.whatsappLink
+          ? { href: res.whatsappLink, label: 'Open in WhatsApp' }
+          : undefined,
         duration: 10000,
       });
     } catch (err) {
@@ -278,10 +292,25 @@ export default function AppointmentDetails() {
                       Phone
                     </dt>
                     <dd
-                      className="text-sm font-medium font-mono mt-0.5"
+                      className="text-sm font-medium font-mono mt-0.5 flex items-center gap-2"
                       style={{ color: 'rgb(var(--clr-ink))' }}
                     >
-                      {appt.phone}
+                      <span>{appt.phone}</span>
+                      <a
+                        href={getWhatsAppLink(appt.phone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md transition-colors no-underline"
+                        style={{
+                          backgroundColor: 'rgba(37, 211, 102, 0.1)',
+                          color: '#25D366',
+                          border: '1px solid rgba(37, 211, 102, 0.2)'
+                        }}
+                        title="Chat on WhatsApp"
+                      >
+                        <MessageSquare className="w-3 h-3" />
+                        Chat
+                      </a>
                     </dd>
                   </div>
                 </div>
@@ -484,6 +513,17 @@ export default function AppointmentDetails() {
                   <Send className="w-3.5 h-3.5" strokeWidth={1.75} />
                   {sendingReminder ? 'Sending...' : 'Send reminder now'}
                 </button>
+                <a
+                  href={getWhatsAppLink(appt.phone)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setActionsOpen(false)}
+                  className="btn-sm btn-secondary w-full justify-start py-2 px-3 no-underline flex items-center gap-1.5"
+                  style={{ color: 'rgb(var(--clr-ink))' }}
+                >
+                  <MessageSquare className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  Open in WhatsApp
+                </a>
                 <button
                   onClick={() => { handleMarkNoShow(); setActionsOpen(false); }}
                   disabled={markingNoShow}

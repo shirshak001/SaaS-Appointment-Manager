@@ -53,7 +53,7 @@ function NotifItem({ notif, onRead }) {
             })()}
           </p>
         )}
-        {notif.whatsappLink && notif.delivery_status !== 'delivered' && (
+        {notif.whatsappLink && (
           <a
             href={notif.whatsappLink}
             target="_blank"
