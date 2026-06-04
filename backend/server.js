@@ -51,6 +51,16 @@ app.get('/api/events', (req, res) => {
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
+// Serve static assets from frontend build folder in production
+const path = require('path');
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDistPath));
+
+// For all other requests, serve index.html (client-side routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDistPath, 'index.html'));
+});
+
 // Initialize DB then start server
 initDb().then(() => {
   app.listen(PORT, () => {
