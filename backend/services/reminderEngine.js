@@ -111,10 +111,11 @@ async function checkAndSendStage(appt, settings, stageKey, windowMs, stage) {
         '15m': 'in 15 minutes',
       }[stage] || 'soon';
 
+      const isHelloWorld = process.env.META_REMINDER_TEMPLATE_NAME === 'hello_world';
       templateOptions = {
         name: process.env.META_REMINDER_TEMPLATE_NAME,
         languageCode: process.env.META_TEMPLATE_LANGUAGE_CODE || 'en_US',
-        parameters: [first, biz, stageText, timeStr, dateStr, num]
+        parameters: isHelloWorld ? [] : [first, biz, stageText, timeStr, dateStr, num]
       };
     }
 

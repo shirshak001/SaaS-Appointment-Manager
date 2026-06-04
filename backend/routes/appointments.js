@@ -130,10 +130,11 @@ router.post('/', authenticate, async (req, res) => {
       const biz = settings?.business_name || 'ReminderFlow';
       const num = settings?.support_number || '';
 
+      const isHelloWorld = process.env.META_CONFIRMATION_TEMPLATE_NAME === 'hello_world';
       templateOptions = {
         name: process.env.META_CONFIRMATION_TEMPLATE_NAME,
         languageCode: process.env.META_TEMPLATE_LANGUAGE_CODE || 'en_US',
-        parameters: [first, biz, timeStr, dateStr, num]
+        parameters: isHelloWorld ? [] : [first, biz, timeStr, dateStr, num]
       };
     }
 
@@ -234,10 +235,11 @@ router.post('/:id/send-reminder', authenticate, async (req, res) => {
       const num = settings?.support_number || '';
       const stageText = 'soon';
 
+      const isHelloWorld = process.env.META_REMINDER_TEMPLATE_NAME === 'hello_world';
       templateOptions = {
         name: process.env.META_REMINDER_TEMPLATE_NAME,
         languageCode: process.env.META_TEMPLATE_LANGUAGE_CODE || 'en_US',
-        parameters: [first, biz, stageText, timeStr, dateStr, num]
+        parameters: isHelloWorld ? [] : [first, biz, stageText, timeStr, dateStr, num]
       };
     }
 
