@@ -61,10 +61,11 @@ router.post('/test-messaging', authorize('admin'), async (req, res) => {
     if (type === 'whatsapp') {
       let templateOptions = null;
       if (process.env.META_CONFIRMATION_TEMPLATE_NAME) {
+        const isHelloWorld = process.env.META_CONFIRMATION_TEMPLATE_NAME === 'hello_world';
         templateOptions = {
           name: process.env.META_CONFIRMATION_TEMPLATE_NAME,
           languageCode: process.env.META_TEMPLATE_LANGUAGE_CODE || 'en_US',
-          parameters: ['TestUser', 'TestClinic', '12:00 PM', 'June 4', '+91 99999 88888']
+          parameters: isHelloWorld ? [] : ['TestUser', 'TestClinic', '12:00 PM', 'June 4', '+91 99999 88888']
         };
       }
       result = await sendWhatsApp(to.trim(), message || 'Test WhatsApp from ReminderFlow', templateOptions);

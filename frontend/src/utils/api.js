@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://saas-appointment-manager.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:4000' : 'https://saas-appointment-manager.onrender.com');
 const BASE = API_URL ? `${API_URL}/api` : '/api';
 console.log('[ReminderFlow API] Base URL configured as:', BASE);
 

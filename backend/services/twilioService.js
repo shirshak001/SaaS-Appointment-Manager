@@ -61,8 +61,11 @@ async function sendWhatsApp(to, body, templateOptions = null) {
           name: templateOptions.name,
           language: {
             code: templateOptions.languageCode || 'en_US'
-          },
-          components: [
+          }
+        };
+
+        if (templateOptions.parameters && templateOptions.parameters.length > 0) {
+          payload.template.components = [
             {
               type: "body",
               parameters: templateOptions.parameters.map(param => ({
@@ -70,8 +73,8 @@ async function sendWhatsApp(to, body, templateOptions = null) {
                 text: String(param)
               }))
             }
-          ]
-        };
+          ];
+        }
       } else {
         payload.type = "text";
         payload.text = {
@@ -80,7 +83,7 @@ async function sendWhatsApp(to, body, templateOptions = null) {
         };
       }
 
-      const response = await fetch(`https://graph.facebook.com/v18.0/${metaPhoneId}/messages`, {
+      const response = await fetch(`https://graph.facebook.com/v25.0/${metaPhoneId}/messages`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${metaAccessToken}`,

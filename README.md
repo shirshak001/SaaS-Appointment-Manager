@@ -26,6 +26,80 @@ ReminderFlow is a premium, state-of-the-art SaaS Appointment and Customer Relati
 
 ---
 
+## 🖥️ Frontend Pages & Functionality Map
+
+ReminderFlow's user interface is structured to separate administrative diagnostics, CRM flows, and scheduling interfaces.
+
+### 1. Dashboard (`Dashboard.jsx`)
+* **Purpose:** The main operational hub for staff and admins.
+* **Key Features:**
+  * **Analytical Widgets:** Displays four real-time counts: Today's Bookings, Total Scheduled Appointments, Outbound Message Logs, and Pending Reminders.
+  * **Quick Actions Panel:** Easy buttons to jump directly to "New Appointment" or "Verify Integrations".
+  * **Live Stream Activity Log:** Real-time updates utilizing Server-Sent Events (SSE) that pop up as reminders get dispatched by the backend loop (complete with wa.me text helper links and diagnostic delivery tags).
+
+### 2. Appointments Directory (`Appointments.jsx`)
+* **Purpose:** Searchable data table containing all client bookings.
+* **Key Features:**
+  * **Search & Filters:** Search by customer name or phone number; filter list by booking status (`Scheduled`, `Confirmed`, `Cancelled`) or dates.
+  * **Manual Dispatch Triggers:** Directly trigger manual WhatsApp/SMS reminders for an appointment from the list row.
+  * **Status Toggles:** Instantly change statuses (e.g. mark an appointment as `Confirmed` or `Cancelled`).
+
+### 3. Create Appointment Form (`CreateAppointment.jsx`)
+* **Purpose:** Booking creation page with conflict protection.
+* **Key Features:**
+  * **Real-time Conflict Checking:** Sends validation requests (`POST /appointments/check-conflict`) as you input times to check if other appointments overlap.
+  * **Suggestion Slots:** If a scheduling conflict is found, the system suggests the next 3 available time slots automatically.
+  * **Outbound Confirmations:** On successful creation, it automatically triggers a WhatsApp Template (or SMS fallback) confirmation message.
+
+### 4. Appointment Details View (`AppointmentDetails.jsx`)
+* **Purpose:** Granular details view of a single appointment record.
+* **Key Features:**
+  * **Communication Logs:** Displays a list of all emails, WhatsApps, or SMS messages sent specifically for this appointment, complete with SIDs and delivery errors.
+  * **Reminder Progress Timeline:** Interactive checklist showing the status of the 3 automatic reminder stages (24h, 1h, 15m), stating whether they are queued, completed, or failed.
+
+### 5. Customers Directory / CRM (`Customers.jsx`)
+* **Purpose:** A CRM view grouping appointments into distinct customer accounts.
+* **Key Features:**
+  * **Customer Profiles aggregation:** Automatically groups appointment records by phone number to create customer lists.
+  * **Loyalty & Attendance Stats:** Tracks total booked slots, completed sessions, and cancellation rates.
+  * **Automatic Risk Indicator:** Renders colored badges (`High`, `Medium`, `Low`) based on attendance history (cancellations and no-shows).
+
+### 6. Customer CRM Profile (`CustomerProfile.jsx`)
+* **Purpose:** Full timeline and profiling of an individual customer.
+* **Key Features:**
+  * **Dynamic Risk Score:** Analyzes no-shows (+35 points), cancellations (+25 points), and unresponded reminders (+15 points) vs. successful sessions (-10 points) to output a 0-100 risk level grade.
+  * **Timeline of Visits:** Displays a chronological feed of all past and upcoming visits.
+  * **Customer Notes Feed:** Log client notes, preferences, or staff comments (saved in NeDB notes database).
+
+### 7. Interactive Calendar (`Calendar.jsx`)
+* **Purpose:** Visual month-view appointment grid.
+* **Key Features:**
+  * **Event Color Coding:** Displays bookings colored by status.
+  * **Detail Previews:** Click on any calendar date/event to view card summaries and navigate to details.
+
+### 8. Message Logs Auditor (`Messages.jsx`)
+* **Purpose:** System audit trail tracking all outgoing communications.
+* **Key Features:**
+  * **Channel Mapping:** Clear indicators showing if a message was sent via `email`, `whatsapp`, or `sms`.
+  * **Delivery Status Reports:** Shows states (`sent`, `delivered`, `failed`) and the raw error messages if an API failed.
+
+### 9. Settings Dashboard (`Settings.jsx`)
+* **Purpose:** Business configurations, session auditing, and testing.
+* **Key Features:**
+  * **Business Metadata:** Configure default business name, support phone number, and addresses appended to reminders.
+  * **Default Reminders Interval:** Set global scheduler rules.
+  * **Diagnostics & Message Testing Card:** Direct testing utility enabling admins to send test WhatsApp templates, Twilio SMS fallbacks, and Nodemailer SMTP emails while displaying raw JSON outputs on the UI.
+  * **Active Session Manager:** Audits logged-in devices, displaying IP addresses, OS headers, login times, and token expirations.
+  * **Database Reset Zone:** Password/confirm-protected clean-slate option.
+
+### 10. Authentication Flow (`Login.jsx`, `VerifyEmail.jsx`, `ForgotPassword.jsx`, `ResetPassword.jsx`)
+* **Purpose:** Access control and account security.
+* **Key Features:**
+  * **Role-Based Guards:** Restricts access to Settings and Analytical Reports to users registered as `admin`.
+  * **OTP Email Verification:** New sign-ups are set as `verified: false` and are locked out of the dashboard until verifying the 6-digit OTP code sent to their email.
+
+---
+
 ## 🛠️ Third-Party Service Configurations
 
 ### 1. WhatsApp Template Messages (Meta Cloud API)
